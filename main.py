@@ -1,22 +1,26 @@
-from aiogram import F
-from PIL import Image
-import io
+import asyncio
+import os
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import Message
 
+# Render platformasida Environment Variables qismiga BOT_TOKEN qo'shgan bo'lsangiz, 
+# u quyidagi qator orqali avtomatik o'qiladi.
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8748222511:AAGYGj8EG2LA0BfUwEd_76v0oXjLIwkjTjA")
+
+# Bot va Dispetcher (dp) obyektlarini yaratamiz
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
+
+# Sizing rasmlarni qabul qiladigan kodingiz
 @dp.message(F.photo)
 async def handle_photo(message: Message):
-    # Telegram'dan rasm yuklab olish
-    file_id = message.photo[-1].file_id
-    file = await bot.get_file(file_id)
-    file_path = file.file_path
-    
-    # Rasm bytes holatiga o‘tkaziladi
-    buffer = io.BytesIO()
-    await bot.download_file(file_path, buffer)
-    buffer.seek(0)
-    
-    # Rasm ochiladi
-    img = Image.open(buffer)
-    
-    # BU YERDA: Gemini API orqali tahlil qilish kodini qo‘shishingiz kerak
-    # Hozircha oddiy javob qaytaramiz:
-    await message.answer("Rasm qabul qilindi, tahlil qilinmoqda...")
+    # Bu yerda rasmni qayta ishlaydigan kodingiz (AI funksiyalari) bo'ladi
+    await message.reply("Rasm qabul qilindi! Taomni tahlil qilyapman...")
+
+# Botni ishga tushirish funksiyasi
+async def main():
+    print("Bot ishga tushdi...")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
