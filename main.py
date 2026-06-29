@@ -95,9 +95,59 @@ async def handle_receipt(message: types.Message, state: FSMContext):
 
 @dp.message(F.photo)
 async def handle_food_photo(message: types.Message):
-    # Gemini orqali rasm tahlili...
-    await message.answer("Tahlil qilinmoqda...")
+    try:
+        await message.answer("🔍 Rasm tahlil qilinmoqda, iltimos kuting...")
+        
+        # Rasmning eng katta versiyasini olish
+        photo = message.photo[-1]
+        file = await bot.get_file(photo.file_id)
+        file_path = file.file_path
+        
+        # Rasmni yuklab olish
+        file_bytes = await bot.download_file(file_path)
+        image_data = file_bytes.read()
+        
+        # Gemini API orqali tahlil qilish
+        import base64
+        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        
+        prompt = """Bu rasmda ko'rsatilgan ovqatni tahlil qilib, quyidagi ma'lumotlarni bering:
+1. Ovqat nomi
+2. Taxminiy kaloriya miqdori (kcal)
+3. Oqsil (g)
+4. Yog' (g)
+5. Uglevodlar (g)
 
+Javobni quyidagi formatda bering:
+🍽 Ovqat: [nom]
+🔥 Kaloriya: [miqdor] kcal
+💪 Oqsil: [miqdor] g
+🧈 Yog': [miqdor] g
+🍞 Uglevodlar: [miqdor] g"""
+        
+        response = gemini_client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=[
+                {
+                    "parts": [
+                        {"text": prompt},
+                        {
+                            "inline_data": {
+                                "mime_type": "image/jpeg",
+                                "data": image_base64
+                            }
+                        }
+                    ]
+                }
+            ]
+        )
+        
+        result_text = response.text
+        await message.answer(result_text)
+        
+    except Exception as e:
+        logging.error(f"Rasm tahlilida xatolik: {e}")
+        await message.answer("❌ Rasm tahlil qilishda hatolik yuz berdi. Qaytadan urinib ko'ring.")
 # --- MAIN ---
 async def main():
     init_db()
