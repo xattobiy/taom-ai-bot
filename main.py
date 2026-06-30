@@ -1377,7 +1377,7 @@ async def handle_food_photo(message: types.Message, state: FSMContext):
                 "Izoh: [nega aynan shu gramm miqdori degan qisqacha tushuntirish]"
             )
 
-                response = await asyncio.to_thread(gemini.models.generate_content,
+        response = await asyncio.to_thread(gemini.models.generate_content,
             model="gemini-1.5-flash",
             contents=[
                 genai_types.Content(
