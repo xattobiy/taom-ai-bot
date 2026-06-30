@@ -7,10 +7,10 @@ from datetime import datetime, timedelta
 import pytz
 
 from aiogram import Bot, Dispatcher, F, types
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.state import State, StatesGroup, default_state
 from aiogram.types import (
     InlineKeyboardMarkup, InlineKeyboardButton,
     ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
@@ -419,6 +419,12 @@ async def cb_lang(call: types.CallbackQuery, state: FSMContext):
     await state.set_state(Reg.age)
     await call.answer()
 
+
+@dp.message(Reg.lang)
+async def reg_lang_text(message: types.Message, state: FSMContext):
+    """Handle text input during language selection (remind to use buttons)"""
+    await message.answer(LANGS["uz"]["lang_select"], reply_markup=lang_kb())
+
 @dp.message(Reg.age)
 async def reg_age(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -490,6 +496,7 @@ async def reg_gender(message: types.Message, state: FSMContext):
     await state.set_state(Reg.activity)
 
 
+pending_food = {}
 
 async def analyze_food_text(message, user, lang):
     """Analyze text food description with Gemini AI"""
@@ -570,12 +577,12 @@ def get_user_lang(tid):
     u = get_user(tid)
     return u.get("lang","uz") if u else "uz"
 
-@dp.message(F.text)
+@dp.message(F.text, StateFilter(default_state))
 async def text_router(message: types.Message, state: FSMContext):
     tid  = message.from_user.id
     user = get_user(tid)
     if not user:
-        await cmd_start(message, state)
+        await message.answer("Botdan foydalanish uchun /start buyrug'ini yuboring.")
         return
     lang = user.get("lang","uz")
     txt  = message.text.strip()
@@ -1283,14 +1290,13 @@ async def cb_admin_reject(call: types.CallbackQuery):
 
 # ── FOOD PHOTO ANALYSIS ──
 # Store pending analysis results temporarily
-pending_food = {}
 
 @dp.message(F.photo)
 async def handle_food_photo(message: types.Message, state: FSMContext):
     tid  = message.from_user.id
     user = get_user(tid)
     if not user:
-        await cmd_start(message, state)
+        await message.answer("Botdan foydalanish uchun /start buyrug'ini yuboring.")
         return
     lang = user.get("lang","uz")
 
