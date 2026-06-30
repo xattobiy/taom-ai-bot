@@ -530,7 +530,7 @@ async def analyze_food_text(message, user, lang):
             "Format:\nTaom: [nom]\nGramm: [REAL miqdor] g\nKaloriya: [son] kkal\nOqsil: [son] g\nYog': [son] g\nUglevodlar: [son] g"
         )
     try:
-        resp = gemini.models.generate_content(
+        resp = await asyncio.to_thread(gemini.models.generate_content,
             model="gemini-1.5-flash",
             contents=[genai_types.Content(parts=[genai_types.Part(text=prompt)])]
         )
@@ -869,7 +869,7 @@ async def handle_ai_message(message: types.Message, state: FSMContext):
         f"Javoblarni {lang} tilida ber."
     )
     try:
-        resp = gemini.models.generate_content(
+        resp = await asyncio.to_thread(gemini.models.generate_content,
             model="gemini-1.5-flash",
             contents=[
                 genai_types.Content(role="user", parts=[
@@ -1377,7 +1377,7 @@ async def handle_food_photo(message: types.Message, state: FSMContext):
                 "Izoh: [nega aynan shu gramm miqdori degan qisqacha tushuntirish]"
             )
 
-                response = gemini.models.generate_content(
+                response = await asyncio.to_thread(gemini.models.generate_content,
             model="gemini-1.5-flash",
             contents=[
                 genai_types.Content(
