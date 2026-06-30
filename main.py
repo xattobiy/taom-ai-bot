@@ -19,7 +19,7 @@ from aiogram.types import (
 from google import genai
 from google.genai import types as genai_types
 
-# ── CONFIG ────────────────────────────────────────────────────────────────────
+# ââ CONFIG ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 BOT_TOKEN   = os.environ.get("BOT_TOKEN",   "8163772583:AAFY4g1M8OS4luohuvrMYpqJ6fa32ue8zvc")
 ADMIN_ID    = int(os.environ.get("ADMIN_ID",  "956947665"))
 GEMINI_KEY  = os.environ.get("GEMINI_API_KEY","AQ.Ab8RN6J_yF03nQqGXE4vivuqZQxW0uOknWRw0cseErYLij5DLw")
@@ -33,97 +33,100 @@ bot = Bot(token=BOT_TOKEN)
 dp  = Dispatcher(storage=MemoryStorage())
 gemini = genai.Client(api_key=GEMINI_KEY)
 
-# ── TRANSLATIONS ──────────────────────────────────────────────────────────────
+# ââ TRANSLATIONS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 LANGS = {
     "uz": {
-        "welcome": "Assalomu alaykum! Men sizning diyeta yordamchingizman 🥗\nTanishishni boshlasak, yoshingizdan boshlaymiz. Yoshingiz nechida?",
-        "ask_height": "Bo'yingiz qancha? (masalan: 170 sm) 📏",
-        "ask_weight": "Vazningiz qancha? (masalan: 60 kg) ⚖️",
+        "welcome": "Assalomu alaykum! Men sizning diyeta yordamchingizman ð¥\nTanishishni boshlasak, yoshingizdan boshlaymiz. Yoshingiz nechida?",
+        "ask_height": "Bo'yingiz qancha? (masalan: 170 sm) ð",
+        "ask_weight": "Vazningiz qancha? (masalan: 60 kg) âï¸",
         "ask_goal": "Maqsadingizni tanlang:",
         "ask_gender": "Jinsingizni tanlang:",
-        "goal_lose": "Ozish 🔥",
-        "goal_gain": "Vazn qo'shish 💪",
-        "goal_keep": "Vaznni ushlab qolish ⚖️",
-        "gender_male": "Erkak 🧑",
-        "gender_female": "Ayol 👩",
-        "ask_activity": "Kunlik faollik darajangizni tanlang: 🏃",
-        "activity_low": "🚶 Kam faol (kam harakatlanaman)",
-        "activity_medium": "🚴 O'rta faol (ba'zan sport qilaman)",
-        "activity_high": "🏋️ Juda faol (muntazam sport)",
-        "reg_done": "🎉 Ro'yxatdan o'tganingiz bilan tabriklayman!\n\nBu botda siz o'z vazningizni oson nazorat qila olasiz 📊\n\nSovg'a sifatida sizga 3 kunlik FREE TRIAL taqdim qilamiz 🎁\n\nTanishtiruv tugadi — endi botdagi imkoniyatlarga o'tamiz!",
-        "main_menu": "Asosiy menyu 🏠",
-        "btn_ration": "🍽 Kunlik ratsion",
-        "btn_food_today": "📋 Bugungi ovqatlar",
-        "btn_food_week": "📅 Haftalik hisobot",
-        "btn_food_month": "📆 Oylik hisobot",
-        "btn_water": "💧 Suv ratsioni",
-        "btn_ai": "🤖 AI Diyetolog",
-        "btn_profile": "👤 Profilim",
-        "btn_vip": "⭐ VIP sotib olish",
-        "btn_check": "🧾 Chek yuborish",
-        "vip_only": "Bu imkoniyat faqat VIP tarifda mavjud! ⭐\n\nVIP sotib olish uchun /vip buyrug'ini yuboring.",
-        "trial_expired": "Bepul sinov muddati tugadi! ⏰\n\nBarcha imkoniyatlardan foydalanish uchun VIP obuna oling.",
-        "lang_select": "Tilni tanlang / Choose language / Выберите язык:",
+        "goal_lose": "Ozish ð¥",
+        "goal_gain": "Vazn qo'shish ðª",
+        "goal_keep": "Vaznni ushlab qolish âï¸",
+        "gender_male": "Erkak ð§",
+        "gender_female": "Ayol ð©",
+        "ask_activity": "Kunlik faollik darajangizni tanlang: ð",
+        "activity_low": "ð¶ Kam faol (kam harakatlanaman)",
+        "activity_medium": "ð´ O'rta faol (ba'zan sport qilaman)",
+        "activity_high": "ðï¸ Juda faol (muntazam sport)",
+        "reg_done": "ð Ro'yxatdan o'tganingiz bilan tabriklayman!\n\nBu botda siz o'z vazningizni oson nazorat qila olasiz ð\n\nSovg'a sifatida sizga 3 kunlik FREE TRIAL taqdim qilamiz ð\n\nTanishtiruv tugadi â endi botdagi imkoniyatlarga o'tamiz!",
+        "main_menu": "Asosiy menyu ð ",
+        "btn_ration": "ð½ Kunlik ratsion",
+        "btn_food_today": "ð Bugungi ovqatlar",
+        "btn_food_week": "ð Haftalik hisobot",
+        "btn_food_month": "ð Oylik hisobot",
+        "btn_water": "ð§ Suv ratsioni",
+        "btn_ai": "ð¤ AI Diyetolog",
+        "btn_profile": "ð¤ Profilim",
+        "btn_vip": "â­ VIP sotib olish",
+        "btn_check": "ð§¾ Chek yuborish",
+        "btn_photo_food": "📸 Ovqat rasmi",
+        "vip_only": "Bu imkoniyat faqat VIP tarifda mavjud! â­\n\nVIP sotib olish uchun /vip buyrug'ini yuboring.",
+        "trial_expired": "Bepul sinov muddati tugadi! â°\n\nBarcha imkoniyatlardan foydalanish uchun VIP obuna oling.",
+        "lang_select": "Tilni tanlang / Choose language / ÐÑÐ±ÐµÑÐ¸ÑÐµ ÑÐ·ÑÐº:",
     },
     "ru": {
-        "welcome": "Ассалому алейкум! Я ваш диетический помощник 🥗\nДавайте познакомимся. Сколько вам лет?",
-        "ask_height": "Какой у вас рост? (например: 170 см) 📏",
-        "ask_weight": "Какой у вас вес? (например: 60 кг) ⚖️",
-        "ask_goal": "Выберите вашу цель:",
-        "ask_gender": "Выберите ваш пол:",
-        "goal_lose": "Похудеть 🔥",
-        "goal_gain": "Набрать вес 💪",
-        "goal_keep": "Поддержать вес ⚖️",
-        "gender_male": "Мужчина 🧑",
-        "gender_female": "Женщина 👩",
-        "ask_activity": "Выберите уровень активности: 🏃",
-        "activity_low": "🚶 Малоактивный (мало движения)",
-        "activity_medium": "🚴 Умеренно активный (иногда спорт)",
-        "activity_high": "🏋️ Очень активный (регулярный спорт)",
-        "reg_done": "🎉 Поздравляю с регистрацией!\n\nВ этом боте вы легко можете контролировать свой вес 📊\n\nВ подарок предоставляем 3-дневный FREE TRIAL 🎁\n\nЗнакомство завершено — переходим к возможностям бота!",
-        "main_menu": "Главное меню 🏠",
-        "btn_ration": "🍽 Дневной рацион",
-        "btn_food_today": "📋 Еда за сегодня",
-        "btn_food_week": "📅 Недельный отчёт",
-        "btn_food_month": "📆 Месячный отчёт",
-        "btn_water": "💧 Водный рацион",
-        "btn_ai": "🤖 AI Диетолог",
-        "btn_profile": "👤 Мой профиль",
-        "btn_vip": "⭐ Купить VIP",
-        "btn_check": "🧾 Отправить чек",
-        "vip_only": "Эта функция доступна только в VIP тарифе! ⭐\n\nДля покупки VIP отправьте /vip.",
-        "trial_expired": "Бесплатный пробный период закончился! ⏰\n\nКупите VIP подписку для доступа ко всем функциям.",
-        "lang_select": "Tilni tanlang / Choose language / Выберите язык:",
+        "welcome": "ÐÑÑÐ°Ð»Ð¾Ð¼Ñ Ð°Ð»ÐµÐ¹ÐºÑÐ¼! Ð¯ Ð²Ð°Ñ Ð´Ð¸ÐµÑÐ¸ÑÐµÑÐºÐ¸Ð¹ Ð¿Ð¾Ð¼Ð¾ÑÐ½Ð¸Ðº ð¥\nÐÐ°Ð²Ð°Ð¹ÑÐµ Ð¿Ð¾Ð·Ð½Ð°ÐºÐ¾Ð¼Ð¸Ð¼ÑÑ. Ð¡ÐºÐ¾Ð»ÑÐºÐ¾ Ð²Ð°Ð¼ Ð»ÐµÑ?",
+        "ask_height": "ÐÐ°ÐºÐ¾Ð¹ Ñ Ð²Ð°Ñ ÑÐ¾ÑÑ? (Ð½Ð°Ð¿ÑÐ¸Ð¼ÐµÑ: 170 ÑÐ¼) ð",
+        "ask_weight": "ÐÐ°ÐºÐ¾Ð¹ Ñ Ð²Ð°Ñ Ð²ÐµÑ? (Ð½Ð°Ð¿ÑÐ¸Ð¼ÐµÑ: 60 ÐºÐ³) âï¸",
+        "ask_goal": "ÐÑÐ±ÐµÑÐ¸ÑÐµ Ð²Ð°ÑÑ ÑÐµÐ»Ñ:",
+        "ask_gender": "ÐÑÐ±ÐµÑÐ¸ÑÐµ Ð²Ð°Ñ Ð¿Ð¾Ð»:",
+        "goal_lose": "ÐÐ¾ÑÑÐ´ÐµÑÑ ð¥",
+        "goal_gain": "ÐÐ°Ð±ÑÐ°ÑÑ Ð²ÐµÑ ðª",
+        "goal_keep": "ÐÐ¾Ð´Ð´ÐµÑÐ¶Ð°ÑÑ Ð²ÐµÑ âï¸",
+        "gender_male": "ÐÑÐ¶ÑÐ¸Ð½Ð° ð§",
+        "gender_female": "ÐÐµÐ½ÑÐ¸Ð½Ð° ð©",
+        "ask_activity": "ÐÑÐ±ÐµÑÐ¸ÑÐµ ÑÑÐ¾Ð²ÐµÐ½Ñ Ð°ÐºÑÐ¸Ð²Ð½Ð¾ÑÑÐ¸: ð",
+        "activity_low": "ð¶ ÐÐ°Ð»Ð¾Ð°ÐºÑÐ¸Ð²Ð½ÑÐ¹ (Ð¼Ð°Ð»Ð¾ Ð´Ð²Ð¸Ð¶ÐµÐ½Ð¸Ñ)",
+        "activity_medium": "ð´ Ð£Ð¼ÐµÑÐµÐ½Ð½Ð¾ Ð°ÐºÑÐ¸Ð²Ð½ÑÐ¹ (Ð¸Ð½Ð¾Ð³Ð´Ð° ÑÐ¿Ð¾ÑÑ)",
+        "activity_high": "ðï¸ ÐÑÐµÐ½Ñ Ð°ÐºÑÐ¸Ð²Ð½ÑÐ¹ (ÑÐµÐ³ÑÐ»ÑÑÐ½ÑÐ¹ ÑÐ¿Ð¾ÑÑ)",
+        "reg_done": "ð ÐÐ¾Ð·Ð´ÑÐ°Ð²Ð»ÑÑ Ñ ÑÐµÐ³Ð¸ÑÑÑÐ°ÑÐ¸ÐµÐ¹!\n\nÐ ÑÑÐ¾Ð¼ Ð±Ð¾ÑÐµ Ð²Ñ Ð»ÐµÐ³ÐºÐ¾ Ð¼Ð¾Ð¶ÐµÑÐµ ÐºÐ¾Ð½ÑÑÐ¾Ð»Ð¸ÑÐ¾Ð²Ð°ÑÑ ÑÐ²Ð¾Ð¹ Ð²ÐµÑ ð\n\nÐ Ð¿Ð¾Ð´Ð°ÑÐ¾Ðº Ð¿ÑÐµÐ´Ð¾ÑÑÐ°Ð²Ð»ÑÐµÐ¼ 3-Ð´Ð½ÐµÐ²Ð½ÑÐ¹ FREE TRIAL ð\n\nÐÐ½Ð°ÐºÐ¾Ð¼ÑÑÐ²Ð¾ Ð·Ð°Ð²ÐµÑÑÐµÐ½Ð¾ â Ð¿ÐµÑÐµÑÐ¾Ð´Ð¸Ð¼ Ðº Ð²Ð¾Ð·Ð¼Ð¾Ð¶Ð½Ð¾ÑÑÑÐ¼ Ð±Ð¾ÑÐ°!",
+        "main_menu": "ÐÐ»Ð°Ð²Ð½Ð¾Ðµ Ð¼ÐµÐ½Ñ ð ",
+        "btn_ration": "ð½ ÐÐ½ÐµÐ²Ð½Ð¾Ð¹ ÑÐ°ÑÐ¸Ð¾Ð½",
+        "btn_food_today": "ð ÐÐ´Ð° Ð·Ð° ÑÐµÐ³Ð¾Ð´Ð½Ñ",
+        "btn_food_week": "ð ÐÐµÐ´ÐµÐ»ÑÐ½ÑÐ¹ Ð¾ÑÑÑÑ",
+        "btn_food_month": "ð ÐÐµÑÑÑÐ½ÑÐ¹ Ð¾ÑÑÑÑ",
+        "btn_water": "ð§ ÐÐ¾Ð´Ð½ÑÐ¹ ÑÐ°ÑÐ¸Ð¾Ð½",
+        "btn_ai": "ð¤ AI ÐÐ¸ÐµÑÐ¾Ð»Ð¾Ð³",
+        "btn_profile": "ð¤ ÐÐ¾Ð¹ Ð¿ÑÐ¾ÑÐ¸Ð»Ñ",
+        "btn_vip": "â­ ÐÑÐ¿Ð¸ÑÑ VIP",
+        "btn_check": "ð§¾ ÐÑÐ¿ÑÐ°Ð²Ð¸ÑÑ ÑÐµÐº",
+        "btn_photo_food": "📸 Фото еды",
+        "vip_only": "Ð­ÑÐ° ÑÑÐ½ÐºÑÐ¸Ñ Ð´Ð¾ÑÑÑÐ¿Ð½Ð° ÑÐ¾Ð»ÑÐºÐ¾ Ð² VIP ÑÐ°ÑÐ¸ÑÐµ! â­\n\nÐÐ»Ñ Ð¿Ð¾ÐºÑÐ¿ÐºÐ¸ VIP Ð¾ÑÐ¿ÑÐ°Ð²ÑÑÐµ /vip.",
+        "trial_expired": "ÐÐµÑÐ¿Ð»Ð°ÑÐ½ÑÐ¹ Ð¿ÑÐ¾Ð±Ð½ÑÐ¹ Ð¿ÐµÑÐ¸Ð¾Ð´ Ð·Ð°ÐºÐ¾Ð½ÑÐ¸Ð»ÑÑ! â°\n\nÐÑÐ¿Ð¸ÑÐµ VIP Ð¿Ð¾Ð´Ð¿Ð¸ÑÐºÑ Ð´Ð»Ñ Ð´Ð¾ÑÑÑÐ¿Ð° ÐºÐ¾ Ð²ÑÐµÐ¼ ÑÑÐ½ÐºÑÐ¸ÑÐ¼.",
+        "lang_select": "Tilni tanlang / Choose language / ÐÑÐ±ÐµÑÐ¸ÑÐµ ÑÐ·ÑÐº:",
     },
     "en": {
-        "welcome": "Hello! I am your diet assistant 🥗\nLet's get acquainted. How old are you?",
-        "ask_height": "What is your height? (e.g. 170 cm) 📏",
-        "ask_weight": "What is your weight? (e.g. 60 kg) ⚖️",
+        "welcome": "Hello! I am your diet assistant ð¥\nLet's get acquainted. How old are you?",
+        "ask_height": "What is your height? (e.g. 170 cm) ð",
+        "ask_weight": "What is your weight? (e.g. 60 kg) âï¸",
         "ask_goal": "Choose your goal:",
         "ask_gender": "Choose your gender:",
-        "goal_lose": "Lose weight 🔥",
-        "goal_gain": "Gain weight 💪",
-        "goal_keep": "Maintain weight ⚖️",
-        "gender_male": "Male 🧑",
-        "gender_female": "Female 👩",
-        "ask_activity": "Select your activity level: 🏃",
-        "activity_low": "🚶 Low active (little movement)",
-        "activity_medium": "🚴 Moderately active (some exercise)",
-        "activity_high": "🏋️ Very active (regular exercise)",
-        "reg_done": "🎉 Congratulations on registering!\n\nIn this bot you can easily track your weight 📊\n\nAs a gift we give you a 3-day FREE TRIAL 🎁\n\nIntro done — let's move to bot features!",
-        "main_menu": "Main menu 🏠",
-        "btn_ration": "🍽 Daily Ration",
-        "btn_food_today": "📋 Today's food",
-        "btn_food_week": "📅 Weekly report",
-        "btn_food_month": "📆 Monthly report",
-        "btn_water": "💧 Water ration",
-        "btn_ai": "🤖 AI Dietologist",
-        "btn_profile": "👤 My profile",
-        "btn_vip": "⭐ Buy VIP",
-        "btn_check": "🧾 Send receipt",
-        "vip_only": "This feature is only available in VIP! ⭐\n\nSend /vip to purchase.",
-        "trial_expired": "Free trial expired! ⏰\n\nBuy VIP subscription to access all features.",
-        "lang_select": "Tilni tanlang / Choose language / Выберите язык:",
+        "goal_lose": "Lose weight ð¥",
+        "goal_gain": "Gain weight ðª",
+        "goal_keep": "Maintain weight âï¸",
+        "gender_male": "Male ð§",
+        "gender_female": "Female ð©",
+        "ask_activity": "Select your activity level: ð",
+        "activity_low": "ð¶ Low active (little movement)",
+        "activity_medium": "ð´ Moderately active (some exercise)",
+        "activity_high": "ðï¸ Very active (regular exercise)",
+        "reg_done": "ð Congratulations on registering!\n\nIn this bot you can easily track your weight ð\n\nAs a gift we give you a 3-day FREE TRIAL ð\n\nIntro done â let's move to bot features!",
+        "main_menu": "Main menu ð ",
+        "btn_ration": "ð½ Daily Ration",
+        "btn_food_today": "ð Today's food",
+        "btn_food_week": "ð Weekly report",
+        "btn_food_month": "ð Monthly report",
+        "btn_water": "ð§ Water ration",
+        "btn_ai": "ð¤ AI Dietologist",
+        "btn_profile": "ð¤ My profile",
+        "btn_vip": "â­ Buy VIP",
+        "btn_check": "ð§¾ Send receipt",
+        "btn_photo_food": "📸 Food photo",
+        "vip_only": "This feature is only available in VIP! â­\n\nSend /vip to purchase.",
+        "trial_expired": "Free trial expired! â°\n\nBuy VIP subscription to access all features.",
+        "lang_select": "Tilni tanlang / Choose language / ÐÑÐ±ÐµÑÐ¸ÑÐµ ÑÐ·ÑÐº:",
     }
 }
 
@@ -133,7 +136,7 @@ def t(user_lang, key, **kwargs):
     return text.format(**kwargs) if kwargs else text
 
 
-# ── DATABASE ──────────────────────────────────────────────────────────────────
+# ââ DATABASE ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 def get_conn():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -164,9 +167,14 @@ def init_db():
             telegram_id INTEGER,
             food_name TEXT,
             calories REAL,
+            protein REAL DEFAULT 0,
+            fat REAL DEFAULT 0,
+            carbs REAL DEFAULT 0,
             meal_type TEXT,
             logged_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
+        -- Add columns if they don't exist (for existing databases)
+        CREATE TABLE IF NOT EXISTS food_logs_migration_done (id INTEGER PRIMARY KEY);
         CREATE TABLE IF NOT EXISTS water_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             telegram_id INTEGER,
@@ -182,6 +190,19 @@ def init_db():
         );
     """)
     conn.commit()
+    # Migration: add BJU columns if missing (for existing databases)
+    try:
+        conn.execute("ALTER TABLE food_logs ADD COLUMN protein REAL DEFAULT 0")
+        conn.commit()
+    except: pass
+    try:
+        conn.execute("ALTER TABLE food_logs ADD COLUMN fat REAL DEFAULT 0")
+        conn.commit()
+    except: pass
+    try:
+        conn.execute("ALTER TABLE food_logs ADD COLUMN carbs REAL DEFAULT 0")
+        conn.commit()
+    except: pass
     conn.close()
 
 def get_user(tid):
@@ -233,7 +254,7 @@ def calc_calories_goal(user):
         target = user.get("target", "keep")
         activity = user.get("activity", "medium")
 
-        if "male" in g.lower() or "erkak" in g.lower() or "мужчина" in g.lower():
+        if "male" in g.lower() or "erkak" in g.lower() or "Ð¼ÑÐ¶ÑÐ¸Ð½Ð°" in g.lower():
             bmr = 10 * w + 6.25 * h - 5 * a + 5
         else:
             bmr = 10 * w + 6.25 * h - 5 * a - 161
@@ -242,9 +263,9 @@ def calc_calories_goal(user):
         act_map = {"low": 1.2, "medium": 1.55, "high": 1.725}
         tdee = bmr * act_map.get(activity, 1.55)
 
-        if "lose" in target or "ozish" in target or "похуд" in target.lower():
+        if "lose" in target or "ozish" in target or "Ð¿Ð¾ÑÑÐ´" in target.lower():
             return round(tdee - 500)
-        elif "gain" in target or "qoshish" in target or "набрать" in target.lower():
+        elif "gain" in target or "qoshish" in target or "Ð½Ð°Ð±ÑÐ°ÑÑ" in target.lower():
             return round(tdee + 500)
         else:
             return round(tdee)
@@ -264,15 +285,15 @@ def get_meal_type():
 
 def meal_label(mt, lang="uz"):
     mapping = {
-        "uz": {"nonushta": "🌅 Nonushta", "tushlik": "☀️ Tushlik", "kechki": "🌙 Kechki ovqat", "kechasi": "🌃 Kechasi"},
-        "ru": {"nonushta": "🌅 Завтрак", "tushlik": "☀️ Обед", "kechki": "🌙 Ужин", "kechasi": "🌃 Ночь"},
-        "en": {"nonushta": "🌅 Breakfast", "tushlik": "☀️ Lunch", "kechki": "🌙 Dinner", "kechasi": "🌃 Night"},
+        "uz": {"nonushta": "ð Nonushta", "tushlik": "âï¸ Tushlik", "kechki": "ð Kechki ovqat", "kechasi": "ð Kechasi"},
+        "ru": {"nonushta": "ð ÐÐ°Ð²ÑÑÐ°Ðº", "tushlik": "âï¸ ÐÐ±ÐµÐ´", "kechki": "ð Ð£Ð¶Ð¸Ð½", "kechasi": "ð ÐÐ¾ÑÑ"},
+        "en": {"nonushta": "ð Breakfast", "tushlik": "âï¸ Lunch", "kechki": "ð Dinner", "kechasi": "ð Night"},
     }
     return mapping.get(lang, mapping["uz"]).get(mt, mt)
 
 
 
-# ── FSM STATES ────────────────────────────────────────────────────────────────
+# ââ FSM STATES ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 class Reg(StatesGroup):
     lang     = State()
     age      = State()
@@ -295,12 +316,12 @@ class AIChat(StatesGroup):
 class BroadcastState(StatesGroup):
     message = State()
 
-# ── KEYBOARDS ─────────────────────────────────────────────────────────────────
+# ââ KEYBOARDS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 def lang_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🇺🇿 O'zbek", callback_data="lang_uz"),
-         InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang_ru"),
-         InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en")]
+        [InlineKeyboardButton(text="ðºð¿ O'zbek", callback_data="lang_uz"),
+         InlineKeyboardButton(text="ð·ðº Ð ÑÑÑÐºÐ¸Ð¹", callback_data="lang_ru"),
+         InlineKeyboardButton(text="ð¬ð§ English", callback_data="lang_en")]
     ])
 
 def goal_kb(lang):
@@ -335,15 +356,16 @@ def main_menu_kb(lang):
             [KeyboardButton(text=t(lang,"btn_food_today")), KeyboardButton(text=t(lang,"btn_food_week"))],
             [KeyboardButton(text=t(lang,"btn_food_month")), KeyboardButton(text=t(lang,"btn_ai"))],
             [KeyboardButton(text=t(lang,"btn_profile")), KeyboardButton(text=t(lang,"btn_vip"))],
+            [KeyboardButton(text=t(lang,"btn_photo_food"))],
         ],
         resize_keyboard=True
     )
 
 def photo_food_kb(lang, pending_id):
     labels = {
-        "uz": ("Yeyman 😋", "Bekor ❌"),
-        "ru": ("Съем 😋", "Отмена ❌"),
-        "en": ("I'll eat 😋", "Cancel ❌"),
+        "uz": ("Yeyman ð", "Bekor â"),
+        "ru": ("Ð¡ÑÐµÐ¼ ð", "ÐÑÐ¼ÐµÐ½Ð° â"),
+        "en": ("I'll eat ð", "Cancel â"),
     }
     eat, cancel = labels.get(lang, labels["uz"])
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -353,9 +375,9 @@ def photo_food_kb(lang, pending_id):
 
 def profile_kb(lang):
     labels = {
-        "uz": ("👤 Men haqimda", "💳 Obunam haqida", "✏️ Men o'zgardim", "🏠 Orqaga"),
-        "ru": ("👤 Обо мне", "💳 О подписке", "✏️ Я изменился", "🏠 Назад"),
-        "en": ("👤 About me", "💳 Subscription", "✏️ I changed", "🏠 Back"),
+        "uz": ("ð¤ Men haqimda", "ð³ Obunam haqida", "âï¸ Men o'zgardim", "ð  Orqaga"),
+        "ru": ("ð¤ ÐÐ±Ð¾ Ð¼Ð½Ðµ", "ð³ Ð Ð¿Ð¾Ð´Ð¿Ð¸ÑÐºÐµ", "âï¸ Ð¯ Ð¸Ð·Ð¼ÐµÐ½Ð¸Ð»ÑÑ", "ð  ÐÐ°Ð·Ð°Ð´"),
+        "en": ("ð¤ About me", "ð³ Subscription", "âï¸ I changed", "ð  Back"),
     }
     a, b, c, d = labels.get(lang, labels["uz"])
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -367,18 +389,18 @@ def profile_kb(lang):
 
 def edit_profile_kb(lang):
     labels = {
-        "uz": [("📏 Bo'y", "edit_height"), ("⚖️ Vazn", "edit_weight"),
-               ("🎂 Yosh", "edit_age"), ("🎯 Maqsad", "edit_target"),
-               ("🏃 Faollik", "edit_activity"),
-               ("🔙 Orqaga", "prof_back")],
-        "ru": [("📏 Рост", "edit_height"), ("⚖️ Вес", "edit_weight"),
-               ("🎂 Возраст", "edit_age"), ("🎯 Цель", "edit_target"),
-               ("🏃 Активность", "edit_activity"),
-               ("🔙 Назад", "prof_back")],
-        "en": [("📏 Height", "edit_height"), ("⚖️ Weight", "edit_weight"),
-               ("🎂 Age", "edit_age"), ("🎯 Goal", "edit_target"),
-               ("🏃 Activity", "edit_activity"),
-               ("🔙 Back", "prof_back")],
+        "uz": [("ð Bo'y", "edit_height"), ("âï¸ Vazn", "edit_weight"),
+               ("ð Yosh", "edit_age"), ("ð¯ Maqsad", "edit_target"),
+               ("ð Faollik", "edit_activity"),
+               ("ð Orqaga", "prof_back")],
+        "ru": [("ð Ð Ð¾ÑÑ", "edit_height"), ("âï¸ ÐÐµÑ", "edit_weight"),
+               ("ð ÐÐ¾Ð·ÑÐ°ÑÑ", "edit_age"), ("ð¯ Ð¦ÐµÐ»Ñ", "edit_target"),
+               ("ð ÐÐºÑÐ¸Ð²Ð½Ð¾ÑÑÑ", "edit_activity"),
+               ("ð ÐÐ°Ð·Ð°Ð´", "prof_back")],
+        "en": [("ð Height", "edit_height"), ("âï¸ Weight", "edit_weight"),
+               ("ð Age", "edit_age"), ("ð¯ Goal", "edit_target"),
+               ("ð Activity", "edit_activity"),
+               ("ð Back", "prof_back")],
     }
     btns = labels.get(lang, labels["uz"])
     rows = [[InlineKeyboardButton(text=b[0], callback_data=b[1])] for b in btns]
@@ -386,9 +408,9 @@ def edit_profile_kb(lang):
 
 def water_kb(lang):
     labels = {
-        "uz": ("✅ Ichdim 💧", "📊 Bugungi suv"),
-        "ru": ("✅ Выпил 💧", "📊 Вода за сегодня"),
-        "en": ("✅ Drank 💧",  "📊 Today water"),
+        "uz": ("â Ichdim ð§", "ð Bugungi suv"),
+        "ru": ("â ÐÑÐ¿Ð¸Ð» ð§", "ð ÐÐ¾Ð´Ð° Ð·Ð° ÑÐµÐ³Ð¾Ð´Ð½Ñ"),
+        "en": ("â Drank ð§",  "ð Today water"),
     }
     a, b = labels.get(lang, labels["uz"])
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -398,13 +420,13 @@ def water_kb(lang):
 
 def admin_approve_kb(user_id, req_id):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ VIP berish", callback_data=f"admin_vip_{user_id}_{req_id}"),
-         InlineKeyboardButton(text="❌ Rad etish", callback_data=f"admin_reject_{user_id}_{req_id}")]
+        [InlineKeyboardButton(text="â VIP berish", callback_data=f"admin_vip_{user_id}_{req_id}"),
+         InlineKeyboardButton(text="â Rad etish", callback_data=f"admin_reject_{user_id}_{req_id}")]
     ])
 
 
 
-# ── HANDLERS: /start ──────────────────────────────────────────────────────────
+# ââ HANDLERS: /start ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
@@ -432,7 +454,7 @@ async def reg_age(message: types.Message, state: FSMContext):
     try:
         age = int(message.text.strip())
     except:
-        await message.answer("❌" + (" Iltimos, raqam kiriting!" if lang=="uz" else " Пожалуйста, введите число!" if lang=="ru" else " Please enter a number!"))
+        await message.answer("â" + (" Iltimos, raqam kiriting!" if lang=="uz" else " ÐÐ¾Ð¶Ð°Ð»ÑÐ¹ÑÑÐ°, Ð²Ð²ÐµÐ´Ð¸ÑÐµ ÑÐ¸ÑÐ»Ð¾!" if lang=="ru" else " Please enter a number!"))
         return
     await state.update_data(age=age)
     await message.answer(t(lang, "ask_height"))
@@ -442,11 +464,11 @@ async def reg_age(message: types.Message, state: FSMContext):
 async def reg_height(message: types.Message, state: FSMContext):
     data = await state.get_data()
     lang = data.get("lang", "uz")
-    txt = message.text.strip().replace("sm","").replace("см","").replace("cm","").strip()
+    txt = message.text.strip().replace("sm","").replace("ÑÐ¼","").replace("cm","").strip()
     try:
         height = float(txt)
     except:
-        await message.answer("❌" + (" Iltimos, to'g'ri qiymat kiriting! Masalan: 170" if lang=="uz" else " Введите корректное значение! Например: 170" if lang=="ru" else " Enter a valid value! E.g. 170"))
+        await message.answer("â" + (" Iltimos, to'g'ri qiymat kiriting! Masalan: 170" if lang=="uz" else " ÐÐ²ÐµÐ´Ð¸ÑÐµ ÐºÐ¾ÑÑÐµÐºÑÐ½Ð¾Ðµ Ð·Ð½Ð°ÑÐµÐ½Ð¸Ðµ! ÐÐ°Ð¿ÑÐ¸Ð¼ÐµÑ: 170" if lang=="ru" else " Enter a valid value! E.g. 170"))
         return
     await state.update_data(height=height)
     await message.answer(t(lang, "ask_weight"))
@@ -456,11 +478,11 @@ async def reg_height(message: types.Message, state: FSMContext):
 async def reg_weight(message: types.Message, state: FSMContext):
     data = await state.get_data()
     lang = data.get("lang", "uz")
-    txt = message.text.strip().replace("kg","").replace("кг","").strip()
+    txt = message.text.strip().replace("kg","").replace("ÐºÐ³","").strip()
     try:
         weight = float(txt)
     except:
-        await message.answer("❌" + (" Iltimos, to'g'ri qiymat kiriting! Masalan: 60" if lang=="uz" else " Введите корректное значение! Например: 60" if lang=="ru" else " Enter a valid value! E.g. 60"))
+        await message.answer("â" + (" Iltimos, to'g'ri qiymat kiriting! Masalan: 60" if lang=="uz" else " ÐÐ²ÐµÐ´Ð¸ÑÐµ ÐºÐ¾ÑÑÐµÐºÑÐ½Ð¾Ðµ Ð·Ð½Ð°ÑÐµÐ½Ð¸Ðµ! ÐÐ°Ð¿ÑÐ¸Ð¼ÐµÑ: 60" if lang=="ru" else " Enter a valid value! E.g. 60"))
         return
     await state.update_data(weight=weight)
     await message.answer(t(lang, "ask_goal"), reply_markup=goal_kb(lang))
@@ -505,8 +527,8 @@ async def analyze_food_text(message, user, lang):
     if lang=="ru":
         prompt = (
             f"Pol'zovatel' opisal edu: '{food_desc}'.\n"
-            "Eto eda? Esli net — otvet' tol'ko 'NET'.\n"
-            "Esli da — rasschiytay REALISTICHNOYE kolichestvo gramm na osnove standartnoy portsii:\n"
+            "Eto eda? Esli net â otvet' tol'ko 'NET'.\n"
+            "Esli da â rasschiytay REALISTICHNOYE kolichestvo gramm na osnove standartnoy portsii:\n"
             "- Tarelka sup = 250-350ml, plov = 300-400g, mansura = 300g\n"
             "- Kusok khleba = 30g, bukhanka = 700g\n"
             "- Yayco = 55g, omllet iz 2 yaits = 120g\n"
@@ -518,7 +540,7 @@ async def analyze_food_text(message, user, lang):
         prompt = (
             f"User described food: '{food_desc}'.\n"
             "Is this food? If not, reply only 'NOT FOOD'.\n"
-            "If yes — calculate REALISTIC grams based on standard portions:\n"
+            "If yes â calculate REALISTIC grams based on standard portions:\n"
             "- Bowl of soup = 250-350ml, rice dish = 300-400g\n"
             "- Slice of bread = 30g, 1 egg = 55g, 2-egg omelette = 120g\n"
             "- Banana = 120g, apple = 150g\n"
@@ -528,8 +550,8 @@ async def analyze_food_text(message, user, lang):
     else:
         prompt = (
             f"Foydalanuvchi ovqat tasvirlab berdi: '{food_desc}'.\n"
-            "Bu ovqatmi? Agar yo'q bo'lsa — faqat 'OVQAT EMAS' deb javob ber.\n"
-            "Agar ha bo'lsa — standart porsiya asosida REAL gramm hisoblang:\n"
+            "Bu ovqatmi? Agar yo'q bo'lsa â faqat 'OVQAT EMAS' deb javob ber.\n"
+            "Agar ha bo'lsa â standart porsiya asosida REAL gramm hisoblang:\n"
             "- Bir kosa sho'rva = 250-350ml, plov = 300-400g, manti 3 dona = 300g\n"
             "- Non bo'lagi = 30g, 1 tuxum = 55g, 2 tuxumli omlet = 120g\n"
             "- Banan = 120g, olma = 150g, semichka bir hovuch = 30g\n"
@@ -547,21 +569,34 @@ async def analyze_food_text(message, user, lang):
             elif lang=="en": await message.answer("\ud83e\udd14 That doesn't look like food. Type a food name or send a photo!")
             else: await message.answer("\ud83e\udd14 Bu ovqat emas. Taom nomini yozing yoki rasm yuboring!")
             return
-        # Parse calories
+        # Parse calories and BJU
         cal = 0
+        protein = 0
+        fat = 0
+        carbs = 0
         food_name = food_desc
         import re
         for line in result.split("\n"):
-            if any(k in line.lower() for k in ["kaloriya","calories","калори"]):
+            if any(k in line.lower() for k in ["kaloriya","calories","ÐºÐ°Ð»Ð¾ÑÐ¸"]):
                 nums = re.findall(r'\d+\.?\d*', line)
                 if nums: cal = float(nums[0])
             if any(k in line.lower() for k in ["taom","dish","blyudo"]):
                 parts = line.split(":")
                 if len(parts) > 1: food_name = parts[1].strip()
+            if any(k in line.lower() for k in ["oqsil","protein","belki"]):
+                nums = re.findall(r'\d+\.?\d*', line)
+                if nums: protein = float(nums[0])
+            if any(k in line.lower() for k in ["yog","fat","zhiry"]):
+                nums = re.findall(r'\d+\.?\d*', line)
+                if nums: fat = float(nums[0])
+            if any(k in line.lower() for k in ["uglevodlar","carbs","uglevody"]):
+                nums = re.findall(r'\d+\.?\d*', line)
+                if nums: carbs = float(nums[0])
         import time
         pend_id = int(time.time() * 1000) % 1000000
         pending_food[pend_id] = {
             "tid": message.from_user.id, "cal": cal, "food": food_name,
+            "protein": protein, "fat": fat, "carbs": carbs,
             "meal_type": meal_t, "lang": lang
         }
         if lang=="ru": header = f"\ud83c\udf7d Analiz ({meal_label(meal_t,'ru')}):"
@@ -572,7 +607,7 @@ async def analyze_food_text(message, user, lang):
         logging.error(f"Food text analysis error: {e}")
 
 
-# ── HANDLERS: MAIN MENU BUTTONS ───────────────────────────────────────────────
+# ââ HANDLERS: MAIN MENU BUTTONS âââââââââââââââââââââââââââââââââââââââââââââââ
 def get_user_lang(tid):
     u = get_user(tid)
     return u.get("lang","uz") if u else "uz"
@@ -609,6 +644,16 @@ async def text_router(message: types.Message, state: FSMContext):
         await handle_vip(message, user, lang)
     elif matches("btn_check"):
         await handle_check_start(message, user, lang, state)
+    elif matches("btn_photo_food"):
+        if not is_vip_or_trial(user):
+            await message.answer(t(lang,"trial_expired"))
+            return
+        if lang=="ru":
+            await message.answer("📸 Otpravte foto blyuda i ya rasschiytayu kaloriya, belki, zhiry i uglevody!")
+        elif lang=="en":
+            await message.answer("📸 Send a photo of your food and I will calculate calories, protein, fat and carbs!")
+        else:
+            await message.answer("📸 Ovqatingiz rasmini yuboring — kaloriya, oqsil, yog' va uglevodlarni hisoblab beraman!")
     else:
         # Try to analyze as food text if user is VIP/trial
         if is_vip_or_trial(user) and len(txt) > 2:
@@ -616,7 +661,7 @@ async def text_router(message: types.Message, state: FSMContext):
         else:
             await message.answer(t(lang,"main_menu"), reply_markup=main_menu_kb(lang))
 
-# ── RATION ────────────────────────────────────────────────────────────────────
+# ââ RATION ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async def handle_ration(message, user, lang):
     if not is_vip_or_trial(user):
         await message.answer(t(lang,"trial_expired"))
@@ -630,66 +675,66 @@ async def handle_ration(message, user, lang):
 
     if lang == "ru":
         if target == "lose":
-            direction = "похудения"
-            advice = "Ешьте меньше жирного и сладкого, больше овощей и белка."
-            foods = "• Гречка, куриная грудка, овощной салат, кефир, яйца, рыба"
+            direction = "Ð¿Ð¾ÑÑÐ´ÐµÐ½Ð¸Ñ"
+            advice = "ÐÑÑÑÐµ Ð¼ÐµÐ½ÑÑÐµ Ð¶Ð¸ÑÐ½Ð¾Ð³Ð¾ Ð¸ ÑÐ»Ð°Ð´ÐºÐ¾Ð³Ð¾, Ð±Ð¾Ð»ÑÑÐµ Ð¾Ð²Ð¾ÑÐµÐ¹ Ð¸ Ð±ÐµÐ»ÐºÐ°."
+            foods = "â¢ ÐÑÐµÑÐºÐ°, ÐºÑÑÐ¸Ð½Ð°Ñ Ð³ÑÑÐ´ÐºÐ°, Ð¾Ð²Ð¾ÑÐ½Ð¾Ð¹ ÑÐ°Ð»Ð°Ñ, ÐºÐµÑÐ¸Ñ, ÑÐ¹ÑÐ°, ÑÑÐ±Ð°"
         elif target == "gain":
-            direction = "набора веса"
-            advice = "Ешьте больше углеводов и белка, не пропускайте приёмы пищи."
-            foods = "• Рис, говядина, орехи, авокадо, молоко, яйца, хлеб"
+            direction = "Ð½Ð°Ð±Ð¾ÑÐ° Ð²ÐµÑÐ°"
+            advice = "ÐÑÑÑÐµ Ð±Ð¾Ð»ÑÑÐµ ÑÐ³Ð»ÐµÐ²Ð¾Ð´Ð¾Ð² Ð¸ Ð±ÐµÐ»ÐºÐ°, Ð½Ðµ Ð¿ÑÐ¾Ð¿ÑÑÐºÐ°Ð¹ÑÐµ Ð¿ÑÐ¸ÑÐ¼Ñ Ð¿Ð¸ÑÐ¸."
+            foods = "â¢ Ð Ð¸Ñ, Ð³Ð¾Ð²ÑÐ´Ð¸Ð½Ð°, Ð¾ÑÐµÑÐ¸, Ð°Ð²Ð¾ÐºÐ°Ð´Ð¾, Ð¼Ð¾Ð»Ð¾ÐºÐ¾, ÑÐ¹ÑÐ°, ÑÐ»ÐµÐ±"
         else:
-            direction = "поддержания веса"
-            advice = "Придерживайтесь сбалансированного питания."
-            foods = "• Любые цельные продукты в умеренном количестве"
-        txt = (f"🍽 *Ваш дневной рацион*\n\n"
-               f"🎯 Цель: {direction}\n"
-               f"🔥 Рекомендуемые калории: *{cgoal} ккал/день*\n"
-               f"💧 Вода: *{water_l} л/день*\n\n"
-               f"📌 Совет: {advice}\n\n"
-               f"🥗 Рекомендуемые продукты:\n{foods}")
+            direction = "Ð¿Ð¾Ð´Ð´ÐµÑÐ¶Ð°Ð½Ð¸Ñ Ð²ÐµÑÐ°"
+            advice = "ÐÑÐ¸Ð´ÐµÑÐ¶Ð¸Ð²Ð°Ð¹ÑÐµÑÑ ÑÐ±Ð°Ð»Ð°Ð½ÑÐ¸ÑÐ¾Ð²Ð°Ð½Ð½Ð¾Ð³Ð¾ Ð¿Ð¸ÑÐ°Ð½Ð¸Ñ."
+            foods = "â¢ ÐÑÐ±ÑÐµ ÑÐµÐ»ÑÐ½ÑÐµ Ð¿ÑÐ¾Ð´ÑÐºÑÑ Ð² ÑÐ¼ÐµÑÐµÐ½Ð½Ð¾Ð¼ ÐºÐ¾Ð»Ð¸ÑÐµÑÑÐ²Ðµ"
+        txt = (f"ð½ *ÐÐ°Ñ Ð´Ð½ÐµÐ²Ð½Ð¾Ð¹ ÑÐ°ÑÐ¸Ð¾Ð½*\n\n"
+               f"ð¯ Ð¦ÐµÐ»Ñ: {direction}\n"
+               f"ð¥ Ð ÐµÐºÐ¾Ð¼ÐµÐ½Ð´ÑÐµÐ¼ÑÐµ ÐºÐ°Ð»Ð¾ÑÐ¸Ð¸: *{cgoal} ÐºÐºÐ°Ð»/Ð´ÐµÐ½Ñ*\n"
+               f"ð§ ÐÐ¾Ð´Ð°: *{water_l} Ð»/Ð´ÐµÐ½Ñ*\n\n"
+               f"ð Ð¡Ð¾Ð²ÐµÑ: {advice}\n\n"
+               f"ð¥ Ð ÐµÐºÐ¾Ð¼ÐµÐ½Ð´ÑÐµÐ¼ÑÐµ Ð¿ÑÐ¾Ð´ÑÐºÑÑ:\n{foods}")
     elif lang == "en":
         if target == "lose":
             direction = "weight loss"
             advice = "Eat less fat and sugar, more vegetables and protein."
-            foods = "• Buckwheat, chicken breast, vegetable salad, kefir, eggs, fish"
+            foods = "â¢ Buckwheat, chicken breast, vegetable salad, kefir, eggs, fish"
         elif target == "gain":
             direction = "weight gain"
             advice = "Eat more carbs and protein, don't skip meals."
-            foods = "• Rice, beef, nuts, avocado, milk, eggs, bread"
+            foods = "â¢ Rice, beef, nuts, avocado, milk, eggs, bread"
         else:
             direction = "weight maintenance"
             advice = "Follow a balanced diet."
-            foods = "• Any whole foods in moderate amounts"
-        txt = (f"🍽 *Your daily ration*\n\n"
-               f"🎯 Goal: {direction}\n"
-               f"🔥 Recommended calories: *{cgoal} kcal/day*\n"
-               f"💧 Water: *{water_l} L/day*\n\n"
-               f"📌 Tip: {advice}\n\n"
-               f"🥗 Recommended foods:\n{foods}")
+            foods = "â¢ Any whole foods in moderate amounts"
+        txt = (f"ð½ *Your daily ration*\n\n"
+               f"ð¯ Goal: {direction}\n"
+               f"ð¥ Recommended calories: *{cgoal} kcal/day*\n"
+               f"ð§ Water: *{water_l} L/day*\n\n"
+               f"ð Tip: {advice}\n\n"
+               f"ð¥ Recommended foods:\n{foods}")
     else:
         if target == "lose":
             direction = "ozish"
             advice = "Kam yog'li, kam shakarli ovqatlar yeng. Ko'proq sabzavot va oqsil iste'mol qiling."
-            foods = "• Karavshanur, tovuq ko'kragi, sabzavot salati, kefir, tuxum, baliq"
+            foods = "â¢ Karavshanur, tovuq ko'kragi, sabzavot salati, kefir, tuxum, baliq"
         elif target == "gain":
             direction = "vazn qo'shish"
             advice = "Ko'proq uglevod va oqsil iste'mol qiling, ovqatni o'tkazib yubormang."
-            foods = "• Guruch, mol go'shti, yong'oq, avokado, sut, tuxum, non"
+            foods = "â¢ Guruch, mol go'shti, yong'oq, avokado, sut, tuxum, non"
         else:
             direction = "vaznni ushlab qolish"
             advice = "Muvozanatli ovqatlanishga amal qiling."
-            foods = "• Har qanday to'liq oziq-ovqat o'rtacha miqdorda"
-        txt = (f"🍽 *Kunlik ratsioningiz*\n\n"
-               f"🎯 Maqsad: {direction}\n"
-               f"🔥 Tavsiya etilgan kaloriya: *{cgoal} kkal/kun*\n"
-               f"💧 Suv: *{water_l} l/kun*\n\n"
-               f"📌 Maslahat: {advice}\n\n"
-               f"🥗 Tavsiya etilgan ovqatlar:\n{foods}")
+            foods = "â¢ Har qanday to'liq oziq-ovqat o'rtacha miqdorda"
+        txt = (f"ð½ *Kunlik ratsioningiz*\n\n"
+               f"ð¯ Maqsad: {direction}\n"
+               f"ð¥ Tavsiya etilgan kaloriya: *{cgoal} kkal/kun*\n"
+               f"ð§ Suv: *{water_l} l/kun*\n\n"
+               f"ð Maslahat: {advice}\n\n"
+               f"ð¥ Tavsiya etilgan ovqatlar:\n{foods}")
     await message.answer(txt, parse_mode="Markdown")
 
 
 
-# ── WATER ─────────────────────────────────────────────────────────────────────
+# ââ WATER âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async def handle_water(message, user, lang):
     if not is_vip_or_trial(user):
         await message.answer(t(lang,"trial_expired"))
@@ -711,22 +756,22 @@ async def handle_water(message, user, lang):
     left_l  = round(max(0, water_l - drunk_l), 2)
 
     if lang == "ru":
-        txt = (f"💧 *Водный рацион*\n\n"
-               f"🎯 Норма: *{water_l} л/день* ({water_ml} мл)\n"
-               f"✅ Выпито сегодня: *{drunk_l} л*\n"
-               f"⏳ Осталось: *{left_l} л*\n\n"
-               f"Нажмите кнопку каждый раз, когда выпиваете стакан воды (250мл)")
+        txt = (f"ð§ *ÐÐ¾Ð´Ð½ÑÐ¹ ÑÐ°ÑÐ¸Ð¾Ð½*\n\n"
+               f"ð¯ ÐÐ¾ÑÐ¼Ð°: *{water_l} Ð»/Ð´ÐµÐ½Ñ* ({water_ml} Ð¼Ð»)\n"
+               f"â ÐÑÐ¿Ð¸ÑÐ¾ ÑÐµÐ³Ð¾Ð´Ð½Ñ: *{drunk_l} Ð»*\n"
+               f"â³ ÐÑÑÐ°Ð»Ð¾ÑÑ: *{left_l} Ð»*\n\n"
+               f"ÐÐ°Ð¶Ð¼Ð¸ÑÐµ ÐºÐ½Ð¾Ð¿ÐºÑ ÐºÐ°Ð¶Ð´ÑÐ¹ ÑÐ°Ð·, ÐºÐ¾Ð³Ð´Ð° Ð²ÑÐ¿Ð¸Ð²Ð°ÐµÑÐµ ÑÑÐ°ÐºÐ°Ð½ Ð²Ð¾Ð´Ñ (250Ð¼Ð»)")
     elif lang == "en":
-        txt = (f"💧 *Water Ration*\n\n"
-               f"🎯 Norm: *{water_l} L/day* ({water_ml} ml)\n"
-               f"✅ Drunk today: *{drunk_l} L*\n"
-               f"⏳ Remaining: *{left_l} L*\n\n"
+        txt = (f"ð§ *Water Ration*\n\n"
+               f"ð¯ Norm: *{water_l} L/day* ({water_ml} ml)\n"
+               f"â Drunk today: *{drunk_l} L*\n"
+               f"â³ Remaining: *{left_l} L*\n\n"
                f"Press the button each time you drink a glass of water (250ml)")
     else:
-        txt = (f"💧 *Suv ratsioni*\n\n"
-               f"🎯 Norma: *{water_l} l/kun* ({water_ml} ml)\n"
-               f"✅ Bugun ichilgan: *{drunk_l} l*\n"
-               f"⏳ Qoldi: *{left_l} l*\n\n"
+        txt = (f"ð§ *Suv ratsioni*\n\n"
+               f"ð¯ Norma: *{water_l} l/kun* ({water_ml} ml)\n"
+               f"â Bugun ichilgan: *{drunk_l} l*\n"
+               f"â³ Qoldi: *{left_l} l*\n\n"
                f"Har safar bir stakan suv (250ml) ichganingizda tugmani bosing")
     await message.answer(txt, parse_mode="Markdown", reply_markup=water_kb(lang))
 
@@ -745,9 +790,9 @@ async def cb_water_drank(call: types.CallbackQuery):
     ).fetchone()[0]
     conn.close()
     drunk_l = round(drunk / 1000, 2)
-    if lang == "ru": msg = f"✅ Записано! Сегодня выпито: *{drunk_l} л* 💧"
-    elif lang == "en": msg = f"✅ Logged! Today drank: *{drunk_l} L* 💧"
-    else: msg = f"✅ Yozildi! Bugun ichilgan: *{drunk_l} l* 💧"
+    if lang == "ru": msg = f"â ÐÐ°Ð¿Ð¸ÑÐ°Ð½Ð¾! Ð¡ÐµÐ³Ð¾Ð´Ð½Ñ Ð²ÑÐ¿Ð¸ÑÐ¾: *{drunk_l} Ð»* ð§"
+    elif lang == "en": msg = f"â Logged! Today drank: *{drunk_l} L* ð§"
+    else: msg = f"â Yozildi! Bugun ichilgan: *{drunk_l} l* ð§"
     await call.answer()
     await call.message.answer(msg, parse_mode="Markdown")
 
@@ -764,20 +809,24 @@ async def cb_water_today(call: types.CallbackQuery):
     ).fetchall()
     conn.close()
     if not rows:
-        if lang=="ru": await call.message.answer("💧 Сегодня воды не зафиксировано.")
-        elif lang=="en": await call.message.answer("💧 No water logged today.")
-        else: await call.message.answer("💧 Bugun suv yozilmagan.")
+        if lang=="ru": await call.message.answer("ð§ Ð¡ÐµÐ³Ð¾Ð´Ð½Ñ Ð²Ð¾Ð´Ñ Ð½Ðµ Ð·Ð°ÑÐ¸ÐºÑÐ¸ÑÐ¾Ð²Ð°Ð½Ð¾.")
+        elif lang=="en": await call.message.answer("ð§ No water logged today.")
+        else: await call.message.answer("ð§ Bugun suv yozilmagan.")
         await call.answer(); return
     total = sum(r[0] for r in rows)
-    lines = [f"  • {r[1][11:16]} — {r[0]} ml" for r in rows]
-    if lang=="ru": header = f"💧 *Вода за сегодня* — {round(total/1000,2)} л\n"
-    elif lang=="en": header = f"💧 *Today's water* — {round(total/1000,2)} L\n"
-    else: header = f"💧 *Bugungi suv* — {round(total/1000,2)} l\n"
+    lines = [f"  â¢ {r[1][11:16]} â {r[0]} ml" for r in rows]
+    if lang=="ru": header = f"ð§ *ÐÐ¾Ð´Ð° Ð·Ð° ÑÐµÐ³Ð¾Ð´Ð½Ñ* â {round(total/1000,2)} Ð»\n"
+    elif lang=="en": header = f"ð§ *Today's water* â {round(total/1000,2)} L\n"
+    else: header = f"ð§ *Bugungi suv* â {round(total/1000,2)} l\n"
     await call.message.answer(header + "\n".join(lines), parse_mode="Markdown")
     await call.answer()
 
-# ── FOOD LOGS ─────────────────────────────────────────────────────────────────
+# ââ FOOD LOGS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async def handle_food_today(message, tid, lang):
+    user = get_user(tid)
+    if not is_vip_or_trial(user):
+        await message.answer(t(lang,"trial_expired"))
+        return
     conn = get_conn()
     today = datetime.now().strftime("%Y-%m-%d")
     rows = conn.execute(
@@ -786,18 +835,22 @@ async def handle_food_today(message, tid, lang):
     ).fetchall()
     conn.close()
     if not rows:
-        if lang=="ru": await message.answer("📋 Сегодня нет записей о еде.")
-        elif lang=="en": await message.answer("📋 No food logged today.")
-        else: await message.answer("📋 Bugun ovqat yozilmagan.")
+        if lang=="ru": await message.answer("ð Ð¡ÐµÐ³Ð¾Ð´Ð½Ñ Ð½ÐµÑ Ð·Ð°Ð¿Ð¸ÑÐµÐ¹ Ð¾ ÐµÐ´Ðµ.")
+        elif lang=="en": await message.answer("ð No food logged today.")
+        else: await message.answer("ð Bugun ovqat yozilmagan.")
         return
     total = sum(r[1] for r in rows)
-    lines = [f"  {meal_label(r[2],lang)} {r[3][11:16]} — {r[0]} ({round(r[1])} kkal)" for r in rows]
-    if lang=="ru": header = f"📋 *Еда за сегодня* — итого {round(total)} ккал\n\n"
-    elif lang=="en": header = f"📋 *Today's food* — total {round(total)} kcal\n\n"
-    else: header = f"📋 *Bugungi ovqatlar* — jami {round(total)} kkal\n\n"
+    lines = [f"  {meal_label(r[2],lang)} {r[3][11:16]} â {r[0]} ({round(r[1])} kkal)" for r in rows]
+    if lang=="ru": header = f"ð *ÐÐ´Ð° Ð·Ð° ÑÐµÐ³Ð¾Ð´Ð½Ñ* â Ð¸ÑÐ¾Ð³Ð¾ {round(total)} ÐºÐºÐ°Ð»\n\n"
+    elif lang=="en": header = f"ð *Today's food* â total {round(total)} kcal\n\n"
+    else: header = f"ð *Bugungi ovqatlar* â jami {round(total)} kkal\n\n"
     await message.answer(header + "\n".join(lines), parse_mode="Markdown")
 
 async def handle_food_week(message, tid, lang):
+    user = get_user(tid)
+    if not is_vip_or_trial(user):
+        await message.answer(t(lang,"trial_expired"))
+        return
     conn = get_conn()
     week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
     rows = conn.execute(
@@ -806,18 +859,22 @@ async def handle_food_week(message, tid, lang):
     ).fetchall()
     conn.close()
     if not rows:
-        if lang=="ru": await message.answer("📅 За неделю нет записей.")
-        elif lang=="en": await message.answer("📅 No records for the week.")
-        else: await message.answer("📅 Hafta davomida yozuv yo'q.")
+        if lang=="ru": await message.answer("ð ÐÐ° Ð½ÐµÐ´ÐµÐ»Ñ Ð½ÐµÑ Ð·Ð°Ð¿Ð¸ÑÐµÐ¹.")
+        elif lang=="en": await message.answer("ð No records for the week.")
+        else: await message.answer("ð Hafta davomida yozuv yo'q.")
         return
     total = sum(r[1] for r in rows)
-    lines = [f"  {r[3][:10]} {meal_label(r[2],lang)} {r[3][11:16]} — {r[0]} ({round(r[1])} kkal)" for r in rows]
-    if lang=="ru": header = f"📅 *Еда за неделю* — итого {round(total)} ккал\n\n"
-    elif lang=="en": header = f"📅 *Weekly food* — total {round(total)} kcal\n\n"
-    else: header = f"📅 *Haftalik ovqatlar* — jami {round(total)} kkal\n\n"
+    lines = [f"  {r[3][:10]} {meal_label(r[2],lang)} {r[3][11:16]} â {r[0]} ({round(r[1])} kkal)" for r in rows]
+    if lang=="ru": header = f"ð *ÐÐ´Ð° Ð·Ð° Ð½ÐµÐ´ÐµÐ»Ñ* â Ð¸ÑÐ¾Ð³Ð¾ {round(total)} ÐºÐºÐ°Ð»\n\n"
+    elif lang=="en": header = f"ð *Weekly food* â total {round(total)} kcal\n\n"
+    else: header = f"ð *Haftalik ovqatlar* â jami {round(total)} kkal\n\n"
     await message.answer(header + "\n".join(lines), parse_mode="Markdown")
 
 async def handle_food_month(message, tid, lang):
+    user = get_user(tid)
+    if not is_vip_or_trial(user):
+        await message.answer(t(lang,"trial_expired"))
+        return
     conn = get_conn()
     month_ago = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
     rows = conn.execute(
@@ -826,28 +883,28 @@ async def handle_food_month(message, tid, lang):
     ).fetchall()
     conn.close()
     if not rows:
-        if lang=="ru": await message.answer("📆 За месяц нет записей.")
-        elif lang=="en": await message.answer("📆 No records for the month.")
-        else: await message.answer("📆 Oy davomida yozuv yo'q.")
+        if lang=="ru": await message.answer("ð ÐÐ° Ð¼ÐµÑÑÑ Ð½ÐµÑ Ð·Ð°Ð¿Ð¸ÑÐµÐ¹.")
+        elif lang=="en": await message.answer("ð No records for the month.")
+        else: await message.answer("ð Oy davomida yozuv yo'q.")
         return
     total = sum(r[1] for r in rows)
-    lines = [f"  {r[3][:10]} {meal_label(r[2],lang)} {r[3][11:16]} — {r[0]} ({round(r[1])} kkal)" for r in rows]
-    if lang=="ru": header = f"📆 *Еда за месяц* — итого {round(total)} ккал\n\n"
-    elif lang=="en": header = f"📆 *Monthly food* — total {round(total)} kcal\n\n"
-    else: header = f"📆 *Oylik ovqatlar* — jami {round(total)} kkal\n\n"
+    lines = [f"  {r[3][:10]} {meal_label(r[2],lang)} {r[3][11:16]} â {r[0]} ({round(r[1])} kkal)" for r in rows]
+    if lang=="ru": header = f"ð *ÐÐ´Ð° Ð·Ð° Ð¼ÐµÑÑÑ* â Ð¸ÑÐ¾Ð³Ð¾ {round(total)} ÐºÐºÐ°Ð»\n\n"
+    elif lang=="en": header = f"ð *Monthly food* â total {round(total)} kcal\n\n"
+    else: header = f"ð *Oylik ovqatlar* â jami {round(total)} kkal\n\n"
     await message.answer(header + "\n".join(lines[:80]), parse_mode="Markdown")
 
 
 
-# ── AI DIETOLOG ───────────────────────────────────────────────────────────────
+# ââ AI DIETOLOG âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async def handle_ai_start(message, user, lang, state):
     if not is_vip_or_trial(user):
         await message.answer(t(lang,"trial_expired"))
         return
     await state.set_state(AIChat.chatting)
-    if lang=="ru": txt = "🤖 *AI Диетолог* — задайте вопрос о питании или похудении!\n\nДля выхода отправьте /menu"
-    elif lang=="en": txt = "🤖 *AI Dietologist* — ask me about nutrition or weight loss!\n\nSend /menu to exit"
-    else: txt = "🤖 *AI Diyetolog* — oziq-ovqat yoki ozish haqida savol bering!\n\n/menu — chiqish uchun"
+    if lang=="ru": txt = "ð¤ *AI ÐÐ¸ÐµÑÐ¾Ð»Ð¾Ð³* â Ð·Ð°Ð´Ð°Ð¹ÑÐµ Ð²Ð¾Ð¿ÑÐ¾Ñ Ð¾ Ð¿Ð¸ÑÐ°Ð½Ð¸Ð¸ Ð¸Ð»Ð¸ Ð¿Ð¾ÑÑÐ´ÐµÐ½Ð¸Ð¸!\n\nÐÐ»Ñ Ð²ÑÑÐ¾Ð´Ð° Ð¾ÑÐ¿ÑÐ°Ð²ÑÑÐµ /menu"
+    elif lang=="en": txt = "ð¤ *AI Dietologist* â ask me about nutrition or weight loss!\n\nSend /menu to exit"
+    else: txt = "ð¤ *AI Diyetolog* â oziq-ovqat yoki ozish haqida savol bering!\n\n/menu â chiqish uchun"
     await message.answer(txt, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove())
 
 @dp.message(AIChat.chatting)
@@ -870,8 +927,8 @@ async def handle_ai_message(message: types.Message, state: FSMContext):
     sys_prompt = (
         "Sen faqat ovqat, diyeta, ozish va vazn olish haqida maslahatlashuvchi AI diyetologsan. "
         "Faqat shu mavzularda javob ber. Boshqa mavzularda: "
-        "'Bizning maqsadimiz — foydalanuvchining sog\'liqli ovqatlanishiga yordam berish. "
-        "Keling, ozish yoki vazn olish haqida gaplashamiz!' — de. "
+        "'Bizning maqsadimiz â foydalanuvchining sog\'liqli ovqatlanishiga yordam berish. "
+        "Keling, ozish yoki vazn olish haqida gaplashamiz!' â de. "
         f"Foydalanuvchi maqsadi: {target}. "
         f"Javoblarni {lang} tilida ber."
     )
@@ -884,12 +941,12 @@ async def handle_ai_message(message: types.Message, state: FSMContext):
                 ])
             ]
         )
-        await message.answer("🤖 " + resp.text)
+        await message.answer("ð¤ " + resp.text)
     except Exception as e:
         logging.error(f"AI error: {e}")
-        if lang=="ru": await message.answer("❌ Ошибка AI. Попробуйте позже.")
-        elif lang=="en": await message.answer("❌ AI error. Try again later.")
-        else: await message.answer("❌ AI xatolik. Keyinroq urinib ko'ring.")
+        if lang=="ru": await message.answer("â ÐÑÐ¸Ð±ÐºÐ° AI. ÐÐ¾Ð¿ÑÐ¾Ð±ÑÐ¹ÑÐµ Ð¿Ð¾Ð·Ð¶Ðµ.")
+        elif lang=="en": await message.answer("â AI error. Try again later.")
+        else: await message.answer("â AI xatolik. Keyinroq urinib ko'ring.")
 
 @dp.message(Reg.activity)
 async def reg_activity(message: types.Message, state: FSMContext):
@@ -937,11 +994,11 @@ async def cmd_menu(message: types.Message, state: FSMContext):
     lang = user.get("lang","uz") if user else "uz"
     await message.answer(t(lang,"main_menu"), reply_markup=main_menu_kb(lang))
 
-# ── PROFILE ───────────────────────────────────────────────────────────────────
+# ââ PROFILE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async def handle_profile(message, user, lang):
-    if lang=="ru": txt = "👤 *Мой профиль*\nВыберите раздел:"
-    elif lang=="en": txt = "👤 *My Profile*\nChoose a section:"
-    else: txt = "👤 *Profilim*\nBo'limni tanlang:"
+    if lang=="ru": txt = "ð¤ *ÐÐ¾Ð¹ Ð¿ÑÐ¾ÑÐ¸Ð»Ñ*\nÐÑÐ±ÐµÑÐ¸ÑÐµ ÑÐ°Ð·Ð´ÐµÐ»:"
+    elif lang=="en": txt = "ð¤ *My Profile*\nChoose a section:"
+    else: txt = "ð¤ *Profilim*\nBo'limni tanlang:"
     await message.answer(txt, parse_mode="Markdown", reply_markup=profile_kb(lang))
 
 @dp.callback_query(F.data == "prof_info")
@@ -951,50 +1008,50 @@ async def cb_prof_info(call: types.CallbackQuery):
         await call.answer("Avval ro'yxatdan o'ting!"); return
     lang = user.get("lang","uz")
     target_map = {
-        "lose": {"uz":"Ozish 🔥","ru":"Похудеть 🔥","en":"Lose weight 🔥"},
-        "gain": {"uz":"Vazn qo'shish 💪","ru":"Набрать вес 💪","en":"Gain weight 💪"},
-        "keep": {"uz":"Vaznni saqlash ⚖️","ru":"Поддержать вес ⚖️","en":"Maintain weight ⚖️"},
+        "lose": {"uz":"Ozish ð¥","ru":"ÐÐ¾ÑÑÐ´ÐµÑÑ ð¥","en":"Lose weight ð¥"},
+        "gain": {"uz":"Vazn qo'shish ðª","ru":"ÐÐ°Ð±ÑÐ°ÑÑ Ð²ÐµÑ ðª","en":"Gain weight ðª"},
+        "keep": {"uz":"Vaznni saqlash âï¸","ru":"ÐÐ¾Ð´Ð´ÐµÑÐ¶Ð°ÑÑ Ð²ÐµÑ âï¸","en":"Maintain weight âï¸"},
     }
     gender_map = {
-        "male": {"uz":"Erkak 🧑","ru":"Мужчина 🧑","en":"Male 🧑"},
-        "female": {"uz":"Ayol 👩","ru":"Женщина 👩","en":"Female 👩"},
+        "male": {"uz":"Erkak ð§","ru":"ÐÑÐ¶ÑÐ¸Ð½Ð° ð§","en":"Male ð§"},
+        "female": {"uz":"Ayol ð©","ru":"ÐÐµÐ½ÑÐ¸Ð½Ð° ð©","en":"Female ð©"},
     }
     activity_map = {
-        "low":    {"uz":"🚶 Kam faol","ru":"🚶 Малоактивный","en":"🚶 Low active"},
-        "medium": {"uz":"🚴 O'rta faol","ru":"🚴 Умеренно активный","en":"🚴 Moderately active"},
-        "high":   {"uz":"🏋️ Juda faol","ru":"🏋️ Очень активный","en":"🏋️ Very active"},
+        "low":    {"uz":"ð¶ Kam faol","ru":"ð¶ ÐÐ°Ð»Ð¾Ð°ÐºÑÐ¸Ð²Ð½ÑÐ¹","en":"ð¶ Low active"},
+        "medium": {"uz":"ð´ O'rta faol","ru":"ð´ Ð£Ð¼ÐµÑÐµÐ½Ð½Ð¾ Ð°ÐºÑÐ¸Ð²Ð½ÑÐ¹","en":"ð´ Moderately active"},
+        "high":   {"uz":"ðï¸ Juda faol","ru":"ðï¸ ÐÑÐµÐ½Ñ Ð°ÐºÑÐ¸Ð²Ð½ÑÐ¹","en":"ðï¸ Very active"},
     }
-    tgt = target_map.get(user.get("target","keep"),{}).get(lang, user.get("target","—"))
-    gen = gender_map.get(user.get("gender",""),{}).get(lang, user.get("gender","—"))
-    act = activity_map.get(user.get("activity","medium"),{}).get(lang, "—")
-    cgoal = user.get("calories_goal") or "—"
+    tgt = target_map.get(user.get("target","keep"),{}).get(lang, user.get("target","â"))
+    gen = gender_map.get(user.get("gender",""),{}).get(lang, user.get("gender","â"))
+    act = activity_map.get(user.get("activity","medium"),{}).get(lang, "â")
+    cgoal = user.get("calories_goal") or "â"
     if lang=="ru":
-        txt = (f"👤 *Информация о вас*\n\n"
-               f"🎂 Возраст: {user.get('age','—')} лет\n"
-               f"👤 Пол: {gen}\n"
-               f"🏃 Активность: {act}\n"
-               f"📏 Рост: {user.get('height','—')} см\n"
-               f"⚖️ Вес: {user.get('weight','—')} кг\n"
-               f"🎯 Цель: {tgt}\n"
-               f"🔥 Норма калорий: {cgoal} ккал/день")
+        txt = (f"ð¤ *ÐÐ½ÑÐ¾ÑÐ¼Ð°ÑÐ¸Ñ Ð¾ Ð²Ð°Ñ*\n\n"
+               f"ð ÐÐ¾Ð·ÑÐ°ÑÑ: {user.get('age','â')} Ð»ÐµÑ\n"
+               f"ð¤ ÐÐ¾Ð»: {gen}\n"
+               f"ð ÐÐºÑÐ¸Ð²Ð½Ð¾ÑÑÑ: {act}\n"
+               f"ð Ð Ð¾ÑÑ: {user.get('height','â')} ÑÐ¼\n"
+               f"âï¸ ÐÐµÑ: {user.get('weight','â')} ÐºÐ³\n"
+               f"ð¯ Ð¦ÐµÐ»Ñ: {tgt}\n"
+               f"ð¥ ÐÐ¾ÑÐ¼Ð° ÐºÐ°Ð»Ð¾ÑÐ¸Ð¹: {cgoal} ÐºÐºÐ°Ð»/Ð´ÐµÐ½Ñ")
     elif lang=="en":
-        txt = (f"👤 *Your Information*\n\n"
-               f"🎂 Age: {user.get('age','—')}\n"
-               f"👤 Gender: {gen}\n"
-               f"🏃 Activity: {act}\n"
-               f"📏 Height: {user.get('height','—')} cm\n"
-               f"⚖️ Weight: {user.get('weight','—')} kg\n"
-               f"🎯 Goal: {tgt}\n"
-               f"🔥 Calorie norm: {cgoal} kcal/day")
+        txt = (f"ð¤ *Your Information*\n\n"
+               f"ð Age: {user.get('age','â')}\n"
+               f"ð¤ Gender: {gen}\n"
+               f"ð Activity: {act}\n"
+               f"ð Height: {user.get('height','â')} cm\n"
+               f"âï¸ Weight: {user.get('weight','â')} kg\n"
+               f"ð¯ Goal: {tgt}\n"
+               f"ð¥ Calorie norm: {cgoal} kcal/day")
     else:
-        txt = (f"👤 *Siz haqingizda*\n\n"
-               f"🎂 Yosh: {user.get('age','—')} yosh\n"
-               f"👤 Jins: {gen}\n"
-               f"🏃 Faollik: {act}\n"
-               f"📏 Bo'y: {user.get('height','—')} sm\n"
-               f"⚖️ Vazn: {user.get('weight','—')} kg\n"
-               f"🎯 Maqsad: {tgt}\n"
-               f"🔥 Kaloriya normasi: {cgoal} kkal/kun")
+        txt = (f"ð¤ *Siz haqingizda*\n\n"
+               f"ð Yosh: {user.get('age','â')} yosh\n"
+               f"ð¤ Jins: {gen}\n"
+               f"ð Faollik: {act}\n"
+               f"ð Bo'y: {user.get('height','â')} sm\n"
+               f"âï¸ Vazn: {user.get('weight','â')} kg\n"
+               f"ð¯ Maqsad: {tgt}\n"
+               f"ð¥ Kaloriya normasi: {cgoal} kkal/kun")
     await call.message.edit_text(txt, parse_mode="Markdown", reply_markup=profile_kb(lang))
     await call.answer()
 
@@ -1005,28 +1062,28 @@ async def cb_prof_sub(call: types.CallbackQuery):
         await call.answer(); return
     lang = user.get("lang","uz")
     if user.get("is_vip"):
-        vs = user.get("vip_start","—")
-        ve = user.get("vip_end","—")
+        vs = user.get("vip_start","â")
+        ve = user.get("vip_end","â")
         try:
             end_dt = datetime.fromisoformat(ve)
             days_left = (end_dt - datetime.now()).days
         except:
-            days_left = "—"
+            days_left = "â"
         if lang=="ru":
-            txt = f"💳 *Ваша подписка*\n\n⭐ Тариф: VIP\n📅 Начало: {vs[:10]}\n📅 Конец: {ve[:10]}\n⏳ Осталось: {days_left} дней"
+            txt = f"ð³ *ÐÐ°ÑÐ° Ð¿Ð¾Ð´Ð¿Ð¸ÑÐºÐ°*\n\nâ­ Ð¢Ð°ÑÐ¸Ñ: VIP\nð ÐÐ°ÑÐ°Ð»Ð¾: {vs[:10]}\nð ÐÐ¾Ð½ÐµÑ: {ve[:10]}\nâ³ ÐÑÑÐ°Ð»Ð¾ÑÑ: {days_left} Ð´Ð½ÐµÐ¹"
         elif lang=="en":
-            txt = f"💳 *Your Subscription*\n\n⭐ Plan: VIP\n📅 Start: {vs[:10]}\n📅 End: {ve[:10]}\n⏳ Remaining: {days_left} days"
+            txt = f"ð³ *Your Subscription*\n\nâ­ Plan: VIP\nð Start: {vs[:10]}\nð End: {ve[:10]}\nâ³ Remaining: {days_left} days"
         else:
-            txt = f"💳 *Obunangiz*\n\n⭐ Tarif: VIP\n📅 Boshlangan: {vs[:10]}\n📅 Tugaydi: {ve[:10]}\n⏳ Qoldi: {days_left} kun"
+            txt = f"ð³ *Obunangiz*\n\nâ­ Tarif: VIP\nð Boshlangan: {vs[:10]}\nð Tugaydi: {ve[:10]}\nâ³ Qoldi: {days_left} kun"
     else:
-        ts = user.get("trial_start","—")
+        ts = user.get("trial_start","â")
         rem = get_trial_remaining(user)
         if lang=="ru":
-            txt = f"💳 *Ваша подписка*\n\n📦 Тариф: FREE TRIAL\n📅 Начало: {ts[:10]}\n⏳ Осталось: {rem} дней"
+            txt = f"ð³ *ÐÐ°ÑÐ° Ð¿Ð¾Ð´Ð¿Ð¸ÑÐºÐ°*\n\nð¦ Ð¢Ð°ÑÐ¸Ñ: FREE TRIAL\nð ÐÐ°ÑÐ°Ð»Ð¾: {ts[:10]}\nâ³ ÐÑÑÐ°Ð»Ð¾ÑÑ: {rem} Ð´Ð½ÐµÐ¹"
         elif lang=="en":
-            txt = f"💳 *Your Subscription*\n\n📦 Plan: FREE TRIAL\n📅 Start: {ts[:10]}\n⏳ Remaining: {rem} days"
+            txt = f"ð³ *Your Subscription*\n\nð¦ Plan: FREE TRIAL\nð Start: {ts[:10]}\nâ³ Remaining: {rem} days"
         else:
-            txt = f"💳 *Obunangiz*\n\n📦 Tarif: FREE TRIAL\n📅 Boshlangan: {ts[:10]}\n⏳ Qoldi: {rem} kun"
+            txt = f"ð³ *Obunangiz*\n\nð¦ Tarif: FREE TRIAL\nð Boshlangan: {ts[:10]}\nâ³ Qoldi: {rem} kun"
     await call.message.edit_text(txt, parse_mode="Markdown", reply_markup=profile_kb(lang))
     await call.answer()
 
@@ -1034,9 +1091,9 @@ async def cb_prof_sub(call: types.CallbackQuery):
 async def cb_prof_edit(call: types.CallbackQuery):
     user = get_user(call.from_user.id)
     lang = user.get("lang","uz") if user else "uz"
-    if lang=="ru": txt = "✏️ Что хотите изменить?"
-    elif lang=="en": txt = "✏️ What would you like to change?"
-    else: txt = "✏️ Nimani o'zgartirmoqchisiz?"
+    if lang=="ru": txt = "âï¸ Ð§ÑÐ¾ ÑÐ¾ÑÐ¸ÑÐµ Ð¸Ð·Ð¼ÐµÐ½Ð¸ÑÑ?"
+    elif lang=="en": txt = "âï¸ What would you like to change?"
+    else: txt = "âï¸ Nimani o'zgartirmoqchisiz?"
     await call.message.edit_text(txt, reply_markup=edit_profile_kb(lang))
     await call.answer()
 
@@ -1044,9 +1101,9 @@ async def cb_prof_edit(call: types.CallbackQuery):
 async def cb_prof_back(call: types.CallbackQuery):
     user = get_user(call.from_user.id)
     lang = user.get("lang","uz") if user else "uz"
-    if lang=="ru": txt = "👤 *Мой профиль*\nВыберите раздел:"
-    elif lang=="en": txt = "👤 *My Profile*\nChoose a section:"
-    else: txt = "👤 *Profilim*\nBo'limni tanlang:"
+    if lang=="ru": txt = "ð¤ *ÐÐ¾Ð¹ Ð¿ÑÐ¾ÑÐ¸Ð»Ñ*\nÐÑÐ±ÐµÑÐ¸ÑÐµ ÑÐ°Ð·Ð´ÐµÐ»:"
+    elif lang=="en": txt = "ð¤ *My Profile*\nChoose a section:"
+    else: txt = "ð¤ *Profilim*\nBo'limni tanlang:"
     await call.message.edit_text(txt, parse_mode="Markdown", reply_markup=profile_kb(lang))
     await call.answer()
 
@@ -1056,11 +1113,11 @@ async def cb_edit_field(call: types.CallbackQuery, state: FSMContext):
     user  = get_user(call.from_user.id)
     lang  = user.get("lang","uz") if user else "uz"
     prompts = {
-        "height":   {"uz":"📏 Yangi bo'yingizni kiriting (sm):", "ru":"📏 Введите новый рост (см):", "en":"📏 Enter new height (cm):"},
-        "weight":   {"uz":"⚖️ Yangi vazningizni kiriting (kg):", "ru":"⚖️ Введите новый вес (кг):", "en":"⚖️ Enter new weight (kg):"},
-        "age":      {"uz":"🎂 Yangi yoshingizni kiriting:", "ru":"🎂 Введите новый возраст:", "en":"🎂 Enter new age:"},
-        "target":   {"uz":"🎯 Maqsadni tanlang:", "ru":"🎯 Выберите цель:", "en":"🎯 Choose goal:"},
-        "activity": {"uz":"🏃 Faollik darajangizni tanlang:", "ru":"🏃 Выберите уровень активности:", "en":"🏃 Choose activity level:"},
+        "height":   {"uz":"ð Yangi bo'yingizni kiriting (sm):", "ru":"ð ÐÐ²ÐµÐ´Ð¸ÑÐµ Ð½Ð¾Ð²ÑÐ¹ ÑÐ¾ÑÑ (ÑÐ¼):", "en":"ð Enter new height (cm):"},
+        "weight":   {"uz":"âï¸ Yangi vazningizni kiriting (kg):", "ru":"âï¸ ÐÐ²ÐµÐ´Ð¸ÑÐµ Ð½Ð¾Ð²ÑÐ¹ Ð²ÐµÑ (ÐºÐ³):", "en":"âï¸ Enter new weight (kg):"},
+        "age":      {"uz":"ð Yangi yoshingizni kiriting:", "ru":"ð ÐÐ²ÐµÐ´Ð¸ÑÐµ Ð½Ð¾Ð²ÑÐ¹ Ð²Ð¾Ð·ÑÐ°ÑÑ:", "en":"ð Enter new age:"},
+        "target":   {"uz":"ð¯ Maqsadni tanlang:", "ru":"ð¯ ÐÑÐ±ÐµÑÐ¸ÑÐµ ÑÐµÐ»Ñ:", "en":"ð¯ Choose goal:"},
+        "activity": {"uz":"ð Faollik darajangizni tanlang:", "ru":"ð ÐÑÐ±ÐµÑÐ¸ÑÐµ ÑÑÐ¾Ð²ÐµÐ½Ñ Ð°ÐºÑÐ¸Ð²Ð½Ð¾ÑÑÐ¸:", "en":"ð Choose activity level:"},
     }
     await state.update_data(edit_field=field)
     if field == "target":
@@ -1082,8 +1139,8 @@ async def edit_profile_value(message: types.Message, state: FSMContext):
     lang  = user.get("lang","uz") if user else "uz"
     val   = message.text.strip()
     try:
-        if field == "height":   save_user(message.from_user.id, height=float(val.replace("sm","").replace("см","").replace("cm","").strip()))
-        elif field == "weight": save_user(message.from_user.id, weight=float(val.replace("kg","").replace("кг","").strip()))
+        if field == "height":   save_user(message.from_user.id, height=float(val.replace("sm","").replace("ÑÐ¼","").replace("cm","").strip()))
+        elif field == "weight": save_user(message.from_user.id, weight=float(val.replace("kg","").replace("ÐºÐ³","").strip()))
         elif field == "age":    save_user(message.from_user.id, age=int(val))
         elif field == "target":
             if val in [t(l,"goal_lose") for l in LANGS]: gv="lose"
@@ -1102,18 +1159,18 @@ async def edit_profile_value(message: types.Message, state: FSMContext):
     except:
         pass
     await state.clear()
-    if lang=="ru": txt = "✅ Данные обновлены!"
-    elif lang=="en": txt = "✅ Data updated!"
-    else: txt = "✅ Ma'lumotlar yangilandi!"
+    if lang=="ru": txt = "â ÐÐ°Ð½Ð½ÑÐµ Ð¾Ð±Ð½Ð¾Ð²Ð»ÐµÐ½Ñ!"
+    elif lang=="en": txt = "â Data updated!"
+    else: txt = "â Ma'lumotlar yangilandi!"
     await message.answer(txt, reply_markup=main_menu_kb(lang))
 
 
 
-# ── VIP & PAYMENT ───────────────────────────────────────────────
+# ââ VIP & PAYMENT âââââââââââââââââââââââââââââââââââââââââââââââ
 async def handle_vip(message, user, lang):
     if lang=="ru":
         txt = (
-            "\u2b50 *VIP Podpiska — Tarify*\n\n"
+            "\u2b50 *VIP Podpiska â Tarify*\n\n"
             "\ud83d\udcc5 *Ezhemesyachno:* 20 000 sum/mes\n"
             "\ud83c\udf1f *Godovoy:* 220 000 sum/god (2 mes besplatno!)\n\n"
             "\ud83d\udcb3 Karta dlya oplaty:\n"
@@ -1123,7 +1180,7 @@ async def handle_vip(message, user, lang):
         )
     elif lang=="en":
         txt = (
-            "\u2b50 *VIP Subscription — Plans*\n\n"
+            "\u2b50 *VIP Subscription â Plans*\n\n"
             "\ud83d\udcc5 *Monthly:* 20,000 UZS/month\n"
             "\ud83c\udf1f *Yearly:* 220,000 UZS/year (2 months free!)\n\n"
             "\ud83d\udcb3 Payment card:\n"
@@ -1133,7 +1190,7 @@ async def handle_vip(message, user, lang):
         )
     else:
         txt = (
-            "\u2b50 *VIP Obuna — Tariflar*\n\n"
+            "\u2b50 *VIP Obuna â Tariflar*\n\n"
             "\ud83d\udcc5 *Oylik:* 20 000 so'm/oy\n"
             "\ud83c\udf1f *Yillik:* 220 000 so'm/yil (2 oy bepul!)\n\n"
             "\ud83d\udcb3 To'lov kartasi:\n"
@@ -1142,8 +1199,8 @@ async def handle_vip(message, user, lang):
             "\ud83e\uddfe *Chek yuborish* tugmasini bosib, skrinshot yuboring."
         )
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="\ud83d\udcc5 Oylik — 20 000 so'm", callback_data="vip_monthly"),
-         InlineKeyboardButton(text="\ud83c\udf1f Yillik — 220 000 so'm", callback_data="vip_yearly")],
+        [InlineKeyboardButton(text="\ud83d\udcc5 Oylik â 20 000 so'm", callback_data="vip_monthly"),
+         InlineKeyboardButton(text="\ud83c\udf1f Yillik â 220 000 so'm", callback_data="vip_yearly")],
         [InlineKeyboardButton(text="\ud83e\uddfe Chek yuborish", callback_data="vip_send_check")],
     ])
     await message.answer(txt, parse_mode="Markdown", reply_markup=kb)
@@ -1166,13 +1223,25 @@ async def cb_vip_plan(call: types.CallbackQuery, state: FSMContext):
     await state.update_data(vip_plan=plan)
     if lang=="ru":
         price = "220 000 sum" if plan=="yearly" else "20 000 sum"
-        await call.message.answer(f"\u2705 Vy vybrali: {'Godovoy' if plan=='yearly' else 'Ezhemesyachnyy'} plan — {price}\n\nPerevedite na kartu `{CARD_NUMBER}` i otpravte \ud83e\uddfe *Chek*", parse_mode="Markdown", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"\u2705 Vy vybrali: {'Godovoy' if plan=='yearly' else 'Ezhemesyachnyy'} plan â {price}\n\nPerevedite na kartu `{CARD_NUMBER}` i otpravte \ud83e\uddfe *Chek*", parse_mode="Markdown", reply_markup=ReplyKeyboardRemove())
     elif lang=="en":
         price = "220,000 UZS" if plan=="yearly" else "20,000 UZS"
-        await call.message.answer(f"\u2705 Selected: {'Yearly' if plan=='yearly' else 'Monthly'} — {price}\n\nTransfer to `{CARD_NUMBER}` and send \ud83e\uddfe *Receipt*", parse_mode="Markdown", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"\u2705 Selected: {'Yearly' if plan=='yearly' else 'Monthly'} â {price}\n\nTransfer to `{CARD_NUMBER}` and send \ud83e\uddfe *Receipt*", parse_mode="Markdown", reply_markup=ReplyKeyboardRemove())
     else:
         price = "220 000 so'm" if plan=="yearly" else "20 000 so'm"
-        await call.message.answer(f"\u2705 Tanlandi: {'Yillik' if plan=='yearly' else 'Oylik'} — {price}\n\nKartaga o'tkazing: `{CARD_NUMBER}`\n\n\ud83e\uddfe *Chek yuborish* tugmasini bosing", parse_mode="Markdown", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"\u2705 Tanlandi: {'Yillik' if plan=='yearly' else 'Oylik'} â {price}\n\nKartaga o'tkazing: `{CARD_NUMBER}`\n\n\ud83e\uddfe *Chek yuborish* tugmasini bosing", parse_mode="Markdown", reply_markup=ReplyKeyboardRemove())
+    send_check_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text="🧾 To'lov chekini yuboring" if lang=="uz" else "🧾 Отправить чек" if lang=="ru" else "🧾 Send receipt",
+            callback_data="vip_send_check"
+        )]
+    ])
+    if lang=="ru":
+        await call.message.answer("📤 Endi kartaga o'tkazma qiling va quyidagi tugmani bosib chekni yuboring:", reply_markup=send_check_kb)
+    elif lang=="en":
+        await call.message.answer("📤 Now make the transfer and press the button below to send your receipt:", reply_markup=send_check_kb)
+    else:
+        await call.message.answer("📤 Endi kartaga o'tkazma qiling va quyidagi tugmani bosib chekni yuboring:", reply_markup=send_check_kb)
     await state.set_state(PaymentState.waiting_receipt)
     await call.answer()
 
@@ -1288,10 +1357,10 @@ async def cb_admin_reject(call: types.CallbackQuery):
     await call.answer("\u274c Rad etildi!")
 
 
-# ── FOOD PHOTO ANALYSIS ──
+# ââ FOOD PHOTO ANALYSIS ââ
 # Store pending analysis results temporarily
 
-@dp.message(F.photo)
+@dp.message(F.photo, StateFilter(default_state))
 async def handle_food_photo(message: types.Message, state: FSMContext):
     tid  = message.from_user.id
     user = get_user(tid)
@@ -1329,7 +1398,7 @@ async def handle_food_photo(message: types.Message, state: FSMContext):
                 "- Yayco = 50-60g\n"
                 "- Srednyaya porsiya plova = 300-400g\n"
                 "- Burger = 150-250g zavisimost ot razm\n"
-                "- NIKOGDA ne pishi 200g kak shablon — analiz kazhdyy raz dolzhen byt' unikalnym!\n\n"
+                "- NIKOGDA ne pishi 200g kak shablon â analiz kazhdyy raz dolzhen byt' unikalnym!\n\n"
                 "Formt otvet:\n"
                 "Blyudo: [tochnoye nazvanie]\n"
                 "Gramm: [REALISTICHNOYE kolichestvo] g\n"
@@ -1350,7 +1419,7 @@ async def handle_food_photo(message: types.Message, state: FSMContext):
                 "- 1 egg = 50-60g\n"
                 "- Average rice plov portion = 300-400g\n"
                 "- Burger = 150-250g depending on size\n"
-                "- NEVER default to 200g as a template — every analysis must reflect the actual image!\n\n"
+                "- NEVER default to 200g as a template â every analysis must reflect the actual image!\n\n"
                 "Response format:\n"
                 "Dish: [exact name]\n"
                 "Grams: [REALISTIC amount] g\n"
@@ -1371,7 +1440,7 @@ async def handle_food_photo(message: types.Message, state: FSMContext):
                 "- 1 ta tuxum = 50-60g\n"
                 "- O'rtacha plov porsiyasi = 300-400g\n"
                 "- Burger = 150-250g o'lchamiga qarab\n"
-                "- HECH QACHON 200g ni shablon sifatida ishlatma — har tahlil rasmga asoslangan REAL son bo'lsin!\n"
+                "- HECH QACHON 200g ni shablon sifatida ishlatma â har tahlil rasmga asoslangan REAL son bo'lsin!\n"
                 "- Agar rasm 40g ovqat ko'rsatsa, 40g de. Agar 350g bo'lsa, 350g de.\n\n"
                 "Javob formati:\n"
                 "Taom: [aniq nom]\n"
@@ -1401,23 +1470,39 @@ async def handle_food_photo(message: types.Message, state: FSMContext):
         )
         result = response.text
 
-        # Parse calories and food name from result
+        # Parse calories, BJU and food name from result
         cal = 0
+        protein = 0
+        fat = 0
+        carbs = 0
         food_name = "Noma'lum taom"
         for line in result.split("\n"):
-            if any(k in line.lower() for k in ["kaloriya","calories","калори"]):
+            if any(k in line.lower() for k in ["kaloriya","calories","ÐºÐ°Ð»Ð¾ÑÐ¸"]):
                 import re
                 nums = re.findall(r'\d+\.?\d*', line)
                 if nums: cal = float(nums[0])
             if any(k in line.lower() for k in ["taom","dish","blyudo","bludo"]):
                 parts = line.split(":")
                 if len(parts) > 1: food_name = parts[1].strip()
+            if any(k in line.lower() for k in ["oqsil","protein","belki"]):
+                import re as _re
+                nums = _re.findall(r'\d+\.?\d*', line)
+                if nums: protein = float(nums[0])
+            if any(k in line.lower() for k in ["yog","fat","zhiry"]):
+                import re as _re
+                nums = _re.findall(r'\d+\.?\d*', line)
+                if nums: fat = float(nums[0])
+            if any(k in line.lower() for k in ["uglevodlar","carbs","uglevody"]):
+                import re as _re
+                nums = _re.findall(r'\d+\.?\d*', line)
+                if nums: carbs = float(nums[0])
 
         # Store pending
         import time
         pend_id = int(time.time() * 1000) % 1000000
         pending_food[pend_id] = {
             "tid": tid, "cal": cal, "food": food_name,
+            "protein": protein, "fat": fat, "carbs": carbs,
             "meal_type": meal_t, "lang": lang
         }
 
@@ -1448,14 +1533,15 @@ async def cb_eat(call: types.CallbackQuery):
         await call.answer("Bu siz uchun emas!"); return
     conn = get_conn()
     conn.execute(
-        "INSERT INTO food_logs (telegram_id, food_name, calories, meal_type) VALUES (?,?,?,?)",
-        (tid, item["food"], item["cal"], item["meal_type"])
+        "INSERT INTO food_logs (telegram_id, food_name, calories, protein, fat, carbs, meal_type) VALUES (?,?,?,?,?,?,?)",
+        (tid, item["food"], item["cal"], item.get("protein",0), item.get("fat",0), item.get("carbs",0), item["meal_type"])
     )
     conn.commit()
     conn.close()
-    if lang=="ru": msg = f"\u2705 {item['food']} ({round(item['cal'])} kkal) yozib qo'yildi!"
-    elif lang=="en": msg = f"\u2705 {item['food']} ({round(item['cal'])} kcal) logged!"
-    else: msg = f"\u2705 {item['food']} ({round(item['cal'])} kkal) hisobotga qo'shildi!"
+    p = item.get('protein', 0); f2 = item.get('fat', 0); cb = item.get('carbs', 0)
+    if lang=="ru": msg = f"✅ {item['food']} ({round(item['cal'])} kcal)\n🧬 Belki: {p:.0f}g | Zhiry: {f2:.0f}g | Uglevody: {cb:.0f}g"
+    elif lang=="en": msg = f"✅ {item['food']} ({round(item['cal'])} kcal)\n🧬 Protein: {p:.0f}g | Fat: {f2:.0f}g | Carbs: {cb:.0f}g"
+    else: msg = f"✅ {item['food']} ({round(item['cal'])} kkal)\n🧬 Oqsil: {p:.0f}g | Yog': {f2:.0f}g | Uglevod: {cb:.0f}g"
     await call.message.edit_reply_markup()
     await call.message.answer(msg)
     await call.answer()
@@ -1468,7 +1554,7 @@ async def cb_cancel_food(call: types.CallbackQuery):
     await call.answer("Bekor qilindi")
 
 
-# ── ADMIN COMMANDS ──
+# ââ ADMIN COMMANDS ââ
 @dp.message(Command("users"))
 async def cmd_users(message: types.Message):
     if message.from_user.id != ADMIN_ID:
@@ -1485,11 +1571,11 @@ async def cmd_users(message: types.Message):
     txt += f"\u2b50 VIP ({len(vip_list)} ta):\n"
     for u in vip_list[:30]:
         uname = f"@{u[1]}" if u[1] else u[2] or str(u[0])
-        txt += f"  • {uname}\n"
+        txt += f"  â¢ {uname}\n"
     txt += f"\n\ud83d\udcf6 Free ({len(free_list)} ta):\n"
     for u in free_list[:30]:
         uname = f"@{u[1]}" if u[1] else u[2] or str(u[0])
-        txt += f"  • {uname}\n"
+        txt += f"  â¢ {uname}\n"
     await message.answer(txt, parse_mode="Markdown")
 
 @dp.message(Command("reklama"))
@@ -1517,7 +1603,7 @@ async def do_broadcast(message: types.Message, state: FSMContext):
     await message.answer(f"\u2705 Yuborildi: {ok}\n\u274c Xato: {fail}")
 
 
-# ── SMART REMINDERS & VIP EXPIRY WARNINGS ──
+# ââ SMART REMINDERS & VIP EXPIRY WARNINGS ââ
 async def send_meal_reminders():
     """Check if user logged food in current meal period, if not send reminder"""
     now = datetime.now(TZ)
@@ -1548,11 +1634,11 @@ async def send_meal_reminders():
         if logged == 0:
             ml = meal_label(current_meal, lang or "uz")
             if lang=="ru":
-                msg = f"\u23f0 {ml} — vy eshchye ne zapisali edu! Zakrepite rezul'tat \ud83d\udcf8"
+                msg = f"\u23f0 {ml} â vy eshchye ne zapisali edu! Zakrepite rezul'tat \ud83d\udcf8"
             elif lang=="en":
-                msg = f"\u23f0 {ml} — you haven't logged food yet! Track your meal \ud83d\udcf8"
+                msg = f"\u23f0 {ml} â you haven't logged food yet! Track your meal \ud83d\udcf8"
             else:
-                msg = f"\u23f0 {ml} — hali ovqat kiritmadingiz! Natijangizni qayd eting \ud83d\udcf8"
+                msg = f"\u23f0 {ml} â hali ovqat kiritmadingiz! Natijangizni qayd eting \ud83d\udcf8"
             try:
                 await bot.send_message(uid, msg)
             except: pass
@@ -1596,12 +1682,12 @@ async def scheduler():
         await asyncio.sleep(60)  # Check every minute
 
 
-# ── TEXT FOOD INPUT ──
+# ââ TEXT FOOD INPUT ââ
 # Also handle text food descriptions for calorie analysis
 # This is handled within the general text_router, but we need AI analysis for food text
 # Users can just describe food in text and get calorie estimate
 
-# ── MAIN ───────────────────────────────────────────────
+# ââ MAIN âââââââââââââââââââââââââââââââââââââââââââââââ
 async def main():
     init_db()
     asyncio.create_task(scheduler())
