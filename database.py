@@ -1,289 +1,380 @@
-# -*- coding: utf-8 -*-
-import sqlite3
-import datetime
+# database.py — Async SQLite layer for AI Dietitian Bot
+import aiosqlite
+import hashlib
+import secrets
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
-DB_PATH = "taom_ai.db"
-TRIAL_DAYS = 3
-VIP_DAYS = 30
+import config
 
-def get_conn():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+# ─────────────────────────────────────────────────────────────────────────────
+# Schema
+# ─────────────────────────────────────────────────────────────────────────────
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS users (
+    user_id         INTEGER PRIMARY KEY,
+    username        TEXT,
+    first_name      TEXT,
+    language        TEXT    NOT NULL DEFAULT 'uz',
+    gender          TEXT,
+    height          REAL,
+    weight          REAL,
+    goal            TEXT    DEFAULT 'keep',
+    activity        TEXT    DEFAULT 'medium',
+    trial_start     TEXT,
+    is_premium      INTEGER DEFAULT 0,
+    premium_until   TEXT,
+    consumed_cal    REAL    DEFAULT 0,
+    target_cal      REAL    DEFAULT 2000,
+    water_intake    INTEGER DEFAULT 0,
+    referred_by     INTEGER,
+    is_banned       INTEGER DEFAULT 0,
+    ref_code        TEXT    UNIQUE,
+    created_at      TEXT    DEFAULT CURRENT_TIMESTAMP
+);
 
-def init_db():
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
-        user_id INTEGER PRIMARY KEY,
-        username TEXT,
-        full_name TEXT,
-        age INTEGER,
-        height REAL,
-        weight REAL,
-        gender TEXT,
-        goal TEXT,
-        calories_goal REAL DEFAULT 0,
-        water_goal REAL DEFAULT 2.0,
-        created_at TEXT,
-        trial_end TEXT,
-        vip_end TEXT,
-        is_banned INTEGER DEFAULT 0
-    )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS meals (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        meal_type TEXT,
-        food_name TEXT,
-        calories REAL DEFAULT 0,
-        protein REAL DEFAULT 0,
-        fat REAL DEFAULT 0,
-        carbs REAL DEFAULT 0,
-        weight_gram REAL DEFAULT 0,
-        logged_at TEXT
-    )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS water_log (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        amount REAL,
-        logged_at TEXT
-    )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS payments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        check_photo_id TEXT,
-        status TEXT DEFAULT 'pending',
-        created_at TEXT,
-        confirmed_at TEXT
-    )''')
-    conn.commit()
-    conn.close()
+CREATE TABLE IF NOT EXISTS food_logs (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL,
+    food_desc   TEXT,
+    calories    REAL    DEFAULT 0,
+    protein     REAL    DEFAULT 0,
+    fat         REAL    DEFAULT 0,
+    carbs       REAL    DEFAULT 0,
+    meal_type   TEXT,
+    logged_at   TEXT    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
 
-def get_user(user_id):
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE user_id=?", (user_id,))
-    row = c.fetchone()
-    conn.close()
-    return dict(row) if row else None
+CREATE TABLE IF NOT EXISTS water_logs (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL,
+    amount_ml   INTEGER DEFAULT 300,
+    logged_at   TEXT    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
 
-def create_user(user_id, username, full_name):
-    now = datetime.datetime.now().isoformat()
-    trial_end = (datetime.datetime.now() + datetime.timedelta(days=TRIAL_DAYS)).isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''INSERT OR IGNORE INTO users
-        (user_id, username, full_name, created_at, trial_end)
-        VALUES (?,?,?,?,?)''',
-        (user_id, username or "", full_name or "", now, trial_end))
-    conn.commit()
-    conn.close()
+CREATE TABLE IF NOT EXISTS payment_requests (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id         INTEGER NOT NULL,
+    plan            TEXT    NOT NULL,
+    photo_file_id   TEXT,
+    status          TEXT    DEFAULT 'pending',
+    created_at      TEXT    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
 
-def update_profile(user_id, age, height, weight, gender, goal):
-    if gender == 'male':
-        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
-    else:
-        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
-    if goal == 'lose':
-        calories_goal = bmr * 1.2 - 500
-        water = round(weight * 0.035 + 0.5, 1)
-    elif goal == 'gain':
-        calories_goal = bmr * 1.2 + 500
-        water = round(weight * 0.04, 1)
-    else:
-        calories_goal = bmr * 1.2
-        water = round(weight * 0.033, 1)
-    water = max(1.5, min(water, 4.0))
-    calories_goal = round(calories_goal)
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''UPDATE users SET age=?, height=?, weight=?, gender=?, goal=?,
-        calories_goal=?, water_goal=? WHERE user_id=?''',
-        (age, height, weight, gender, goal, calories_goal, water, user_id))
-    conn.commit()
-    conn.close()
+CREATE TABLE IF NOT EXISTS referrals (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_id INTEGER NOT NULL,
+    referred_id INTEGER NOT NULL UNIQUE,
+    created_at  TEXT    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(referrer_id) REFERENCES users(user_id),
+    FOREIGN KEY(referred_id) REFERENCES users(user_id)
+);
+"""
 
-def is_access_allowed(user_id):
-    user = get_user(user_id)
-    if not user:
+# ─────────────────────────────────────────────────────────────────────────────
+# Init
+# ─────────────────────────────────────────────────────────────────────────────
+async def init_db() -> None:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        await db.executescript(SCHEMA)
+        await db.commit()
+
+# ─────────────────────────────────────────────────────────────────────────────
+# User helpers
+# ─────────────────────────────────────────────────────────────────────────────
+async def get_user(user_id: int) -> Optional[dict]:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM users WHERE user_id = ?", (user_id,)
+        ) as cur:
+            row = await cur.fetchone()
+            return dict(row) if row else None
+
+
+async def upsert_user(user_id: int, **fields) -> None:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        row = await db.execute(
+            "SELECT user_id FROM users WHERE user_id = ?", (user_id,)
+        )
+        exists = await row.fetchone()
+        if exists:
+            sets = ", ".join(f"{k} = ?" for k in fields)
+            vals = list(fields.values()) + [user_id]
+            await db.execute(f"UPDATE users SET {sets} WHERE user_id = ?", vals)
+        else:
+            fields["user_id"] = user_id
+            if "ref_code" not in fields:
+                fields["ref_code"] = _generate_ref_code(user_id)
+            if "trial_start" not in fields:
+                fields["trial_start"] = datetime.utcnow().isoformat()
+            cols = ", ".join(fields.keys())
+            phs  = ", ".join("?" * len(fields))
+            await db.execute(f"INSERT INTO users ({cols}) VALUES ({phs})", list(fields.values()))
+        await db.commit()
+
+
+def _generate_ref_code(user_id: int) -> str:
+    return hashlib.md5(f"{user_id}{secrets.token_hex(4)}".encode()).hexdigest()[:10]
+
+
+async def get_all_users() -> list[dict]:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT * FROM users WHERE is_banned = 0") as cur:
+            rows = await cur.fetchall()
+            return [dict(r) for r in rows]
+
+
+async def count_users() -> int:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        async with db.execute("SELECT COUNT(*) FROM users") as cur:
+            row = await cur.fetchone()
+            return row[0] if row else 0
+
+
+async def count_active_today() -> int:
+    today = datetime.utcnow().date().isoformat()
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        async with db.execute(
+            "SELECT COUNT(DISTINCT user_id) FROM food_logs WHERE date(logged_at) = ?", (today,)
+        ) as cur:
+            row = await cur.fetchone()
+            return row[0] if row else 0
+
+
+async def count_premium_users() -> int:
+    now = datetime.utcnow().isoformat()
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        async with db.execute(
+            "SELECT COUNT(*) FROM users WHERE is_premium = 1 AND (premium_until IS NULL OR premium_until > ?)",
+            (now,),
+        ) as cur:
+            row = await cur.fetchone()
+            return row[0] if row else 0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Trial / Premium helpers
+# ─────────────────────────────────────────────────────────────────────────────
+def is_trial_active(user: dict) -> bool:
+    ts = user.get("trial_start")
+    if not ts:
         return False
-    now = datetime.datetime.now()
-    if user.get('vip_end'):
+    start = datetime.fromisoformat(ts)
+    return datetime.utcnow() < start + timedelta(days=config.TRIAL_DAYS)
+
+
+def trial_days_left(user: dict) -> int:
+    ts = user.get("trial_start")
+    if not ts:
+        return 0
+    start = datetime.fromisoformat(ts)
+    delta = (start + timedelta(days=config.TRIAL_DAYS)) - datetime.utcnow()
+    return max(0, delta.days)
+
+
+def is_premium_active(user: dict) -> bool:
+    if not user.get("is_premium"):
+        return False
+    pu = user.get("premium_until")
+    if not pu:
+        return True  # lifetime
+    return datetime.utcnow() < datetime.fromisoformat(pu)
+
+
+def has_access(user: dict) -> bool:
+    return is_trial_active(user) or is_premium_active(user)
+
+
+async def grant_premium(user_id: int, days: int) -> None:
+    user = await get_user(user_id)
+    now = datetime.utcnow()
+    if user and user.get("is_premium") and user.get("premium_until"):
+        base = datetime.fromisoformat(user["premium_until"])
+        base = max(base, now)
+    else:
+        base = now
+    until = (base + timedelta(days=days)).isoformat()
+    await upsert_user(user_id, is_premium=1, premium_until=until)
+
+
+async def ban_user(user_id: int) -> None:
+    await upsert_user(user_id, is_banned=1)
+
+
+async def unban_user(user_id: int) -> None:
+    await upsert_user(user_id, is_banned=0)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Food logs
+# ─────────────────────────────────────────────────────────────────────────────
+async def log_food(
+    user_id: int,
+    food_desc: str,
+    calories: float,
+    protein: float = 0,
+    fat: float = 0,
+    carbs: float = 0,
+    meal_type: str = "other",
+) -> None:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        await db.execute(
+            """INSERT INTO food_logs (user_id, food_desc, calories, protein, fat, carbs, meal_type)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (user_id, food_desc, calories, protein, fat, carbs, meal_type),
+        )
+        # update daily consumed
+        await db.execute(
+            "UPDATE users SET consumed_cal = consumed_cal + ? WHERE user_id = ?",
+            (calories, user_id),
+        )
+        await db.commit()
+
+
+async def get_today_food_logs(user_id: int) -> list[dict]:
+    today = datetime.utcnow().date().isoformat()
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM food_logs WHERE user_id = ? AND date(logged_at) = ?",
+            (user_id, today),
+        ) as cur:
+            rows = await cur.fetchall()
+            return [dict(r) for r in rows]
+
+
+async def get_today_calories(user_id: int) -> float:
+    logs = await get_today_food_logs(user_id)
+    return sum(r["calories"] for r in logs)
+
+
+async def has_meal_today(user_id: int, meal_type: str) -> bool:
+    today = datetime.utcnow().date().isoformat()
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        async with db.execute(
+            "SELECT id FROM food_logs WHERE user_id = ? AND meal_type = ? AND date(logged_at) = ?",
+            (user_id, meal_type, today),
+        ) as cur:
+            row = await cur.fetchone()
+            return row is not None
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Water logs
+# ─────────────────────────────────────────────────────────────────────────────
+async def log_water(user_id: int, amount_ml: int = 300) -> None:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        await db.execute(
+            "INSERT INTO water_logs (user_id, amount_ml) VALUES (?, ?)",
+            (user_id, amount_ml),
+        )
+        await db.execute(
+            "UPDATE users SET water_intake = water_intake + ? WHERE user_id = ?",
+            (amount_ml, user_id),
+        )
+        await db.commit()
+
+
+async def get_today_water(user_id: int) -> int:
+    today = datetime.utcnow().date().isoformat()
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        async with db.execute(
+            "SELECT COALESCE(SUM(amount_ml), 0) FROM water_logs WHERE user_id = ? AND date(logged_at) = ?",
+            (user_id, today),
+        ) as cur:
+            row = await cur.fetchone()
+            return int(row[0]) if row else 0
+
+
+async def had_water_today(user_id: int) -> bool:
+    return (await get_today_water(user_id)) > 0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Payment requests
+# ─────────────────────────────────────────────────────────────────────────────
+async def create_payment_request(user_id: int, plan: str, photo_file_id: str) -> int:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        cur = await db.execute(
+            "INSERT INTO payment_requests (user_id, plan, photo_file_id) VALUES (?, ?, ?)",
+            (user_id, plan, photo_file_id),
+        )
+        await db.commit()
+        return cur.lastrowid
+
+
+async def get_payment_request(req_id: int) -> Optional[dict]:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM payment_requests WHERE id = ?", (req_id,)
+        ) as cur:
+            row = await cur.fetchone()
+            return dict(row) if row else None
+
+
+async def update_payment_status(req_id: int, status: str) -> None:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        await db.execute(
+            "UPDATE payment_requests SET status = ? WHERE id = ?", (status, req_id)
+        )
+        await db.commit()
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Referrals
+# ─────────────────────────────────────────────────────────────────────────────
+async def record_referral(referrer_id: int, referred_id: int) -> None:
+    async with aiosqlite.connect(config.DB_PATH) as db:
         try:
-            if datetime.datetime.fromisoformat(user['vip_end']) > now:
-                return True
-        except:
+            await db.execute(
+                "INSERT OR IGNORE INTO referrals (referrer_id, referred_id) VALUES (?, ?)",
+                (referrer_id, referred_id),
+            )
+            await db.commit()
+        except Exception:
             pass
-    if user.get('trial_end'):
-        try:
-            if datetime.datetime.fromisoformat(user['trial_end']) > now:
-                return True
-        except:
-            pass
-    return False
 
-def is_vip(user_id):
-    user = get_user(user_id)
-    if not user or not user.get('vip_end'):
-        return False
-    try:
-        return datetime.datetime.fromisoformat(user['vip_end']) > datetime.datetime.now()
-    except:
-        return False
 
-def is_trial_active(user_id):
-    user = get_user(user_id)
-    if not user or not user.get('trial_end'):
-        return False
-    try:
-        return datetime.datetime.fromisoformat(user['trial_end']) > datetime.datetime.now()
-    except:
-        return False
+async def count_referrals(user_id: int) -> int:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        async with db.execute(
+            "SELECT COUNT(*) FROM referrals WHERE referrer_id = ?", (user_id,)
+        ) as cur:
+            row = await cur.fetchone()
+            return row[0] if row else 0
 
-def activate_vip(user_id, days=30):
-    now = datetime.datetime.now()
-    user = get_user(user_id)
-    if user and user.get('vip_end'):
-        try:
-            current_end = datetime.datetime.fromisoformat(user['vip_end'])
-            vip_end = current_end + datetime.timedelta(days=days) if current_end > now else now + datetime.timedelta(days=days)
-        except:
-            vip_end = now + datetime.timedelta(days=days)
+
+async def get_user_by_ref_code(ref_code: str) -> Optional[dict]:
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM users WHERE ref_code = ?", (ref_code,)
+        ) as cur:
+            row = await cur.fetchone()
+            return dict(row) if row else None
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Calorie calculations (Mifflin-St Jeor)
+# ─────────────────────────────────────────────────────────────────────────────
+def calc_target_calories(user: dict) -> int:
+    w = float(user.get("weight") or 70)
+    h = float(user.get("height") or 170)
+    age = 25  # default; not stored separately in this schema
+    gender  = (user.get("gender") or "male").lower()
+    goal    = (user.get("goal")   or "keep").lower()
+    activity = (user.get("activity") or "medium").lower()
+
+    if "female" in gender or "ayol" in gender or "женщ" in gender:
+        bmr = 10 * w + 6.25 * h - 5 * age - 161
     else:
-        vip_end = now + datetime.timedelta(days=days)
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("UPDATE users SET vip_end=? WHERE user_id=?", (vip_end.isoformat(), user_id))
-    conn.commit()
-    conn.close()
+        bmr = 10 * w + 6.25 * h - 5 * age + 5
 
-def add_meal(user_id, meal_type, food_name, calories, protein, fat, carbs, weight_gram):
-    now = datetime.datetime.now().isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''INSERT INTO meals (user_id, meal_type, food_name, calories, protein, fat, carbs, weight_gram, logged_at)
-        VALUES (?,?,?,?,?,?,?,?,?)''',
-        (user_id, meal_type, food_name, calories, protein, fat, carbs, weight_gram, now))
-    conn.commit()
-    conn.close()
+    act_map = {"low": 1.2, "medium": 1.55, "high": 1.725}
+    tdee = bmr * act_map.get(activity, 1.55)
 
-def get_meals_today(user_id):
-    today = datetime.date.today().isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''SELECT * FROM meals WHERE user_id=? AND logged_at LIKE ?
-        ORDER BY logged_at ASC''', (user_id, today + '%'))
-    rows = c.fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
-
-def get_meals_week(user_id):
-    week_ago = (datetime.datetime.now() - datetime.timedelta(days=7)).isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''SELECT * FROM meals WHERE user_id=? AND logged_at >= ?
-        ORDER BY logged_at ASC''', (user_id, week_ago))
-    rows = c.fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
-
-def get_meals_month(user_id):
-    month_ago = (datetime.datetime.now() - datetime.timedelta(days=30)).isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''SELECT * FROM meals WHERE user_id=? AND logged_at >= ?
-        ORDER BY logged_at ASC''', (user_id, month_ago))
-    rows = c.fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
-
-def add_water(user_id, amount):
-    now = datetime.datetime.now().isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("INSERT INTO water_log (user_id, amount, logged_at) VALUES (?,?,?)",
-        (user_id, amount, now))
-    conn.commit()
-    conn.close()
-
-def get_water_today(user_id):
-    today = datetime.date.today().isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''SELECT COALESCE(SUM(amount),0) as total FROM water_log
-        WHERE user_id=? AND logged_at LIKE ?''', (user_id, today + '%'))
-    row = c.fetchone()
-    conn.close()
-    return row['total'] if row else 0
-
-def add_payment(user_id, check_photo_id):
-    now = datetime.datetime.now().isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute('''INSERT INTO payments (user_id, check_photo_id, status, created_at)
-        VALUES (?,?,?,?)''', (user_id, check_photo_id, 'pending', now))
-    last_id = c.lastrowid
-    conn.commit()
-    conn.close()
-    return last_id
-
-def confirm_payment(payment_id):
-    now = datetime.datetime.now().isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("UPDATE payments SET status='confirmed', confirmed_at=? WHERE id=?",
-        (now, payment_id))
-    c.execute("SELECT user_id FROM payments WHERE id=?", (payment_id,))
-    row = c.fetchone()
-    conn.commit()
-    conn.close()
-    if row:
-        activate_vip(row['user_id'])
-        return row['user_id']
-    return None
-
-def get_all_users():
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("SELECT * FROM users ORDER BY created_at DESC")
-    rows = c.fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
-
-def get_users_without_meal_today_in_range(start_hour, end_hour):
-    today = datetime.date.today().isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("SELECT user_id FROM users")
-    all_users = [row['user_id'] for row in c.fetchall()]
-    result = []
-    for uid in all_users:
-        c.execute('''SELECT COUNT(*) as cnt FROM meals
-            WHERE user_id=? AND logged_at LIKE ?
-            AND CAST(strftime('%H', logged_at) AS INTEGER) >= ?
-            AND CAST(strftime('%H', logged_at) AS INTEGER) < ?''',
-            (uid, today + '%', start_hour, end_hour))
-        row = c.fetchone()
-        if row and row['cnt'] == 0:
-            result.append(uid)
-    conn.close()
-    return result
-
-def get_users_vip_expiring_in_days(days=5):
-    target_date = (datetime.datetime.now() + datetime.timedelta(days=days)).date().isoformat()
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("SELECT user_id FROM users WHERE vip_end LIKE ?", (target_date + '%',))
-    rows = c.fetchall()
-    conn.close()
-    return [row['user_id'] for row in rows]
-
-def get_meal_type_by_hour(hour):
-    if 6 <= hour < 11:
-        return 'nonushta'
-    elif 11 <= hour < 16:
-        return 'tushlik'
-    elif 16 <= hour < 22:
-        return 'kechki_ovqat'
-    else:
-        return 'boshqa'
+    if any(k in goal for k in ("lose", "ozish", "похуд")):
+        return max(1200, round(tdee - 500))
+    if any(k in goal for k in ("gain", "qoshish", "набрать")):
+        return round(tdee + 500)
+    return round(tdee)
