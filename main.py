@@ -578,18 +578,17 @@ async def _analyze_food_photo(message: types.Message):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  HANDLER REGISTRATION ORDER (most specific → least specific)
+#  HANDLER REGISTRATION ORDER  (specific → generic, registration first)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# ── /start ────────────────────────────────────────────────────────────────────
+# ── 1. /start  ───────────────────────────────────────────────────────────────
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer(LANGS["uz"]["lang_select"], reply_markup=lang_kb())
     await state.set_state(Reg.lang)
 
-
-# ── /menu (exit AI chat, etc.) ────────────────────────────────────────────────
+# ── 2. /menu  ────────────────────────────────────────────────────────────────
 @dp.message(Command("menu"))
 async def cmd_menu(message: types.Message, state: FSMContext):
     await state.clear()
@@ -598,8 +597,7 @@ async def cmd_menu(message: types.Message, state: FSMContext):
     lang = user.get("lang", "uz") if user else "uz"
     await message.answer(t(lang, "main_menu"), reply_markup=main_menu_kb(lang))
 
-
-# ── /vip command ──────────────────────────────────────────────────────────────
+# ── 3. /vip  ─────────────────────────────────────────────────────────────────
 @dp.message(Command("vip"))
 async def cmd_vip(message: types.Message, state: FSMContext):
     await state.clear()
@@ -608,9 +606,8 @@ async def cmd_vip(message: types.Message, state: FSMContext):
     lang = user.get("lang", "uz") if user else "uz"
     await _show_vip_plans(message, lang, state)
 
-
-# ── REGISTRATION FLOW ─────────────────────────────────────────────────────────
-@dp.callback_query(F.data.startswith("lang_"), Reg.lang)
+# ── 4. REGISTRATION FSM — language choice (inline button, Reg.lang state) ────
+@dp.callback_query(F.data.startswith("lang_"), StateFilter(Reg.lang))
 async def cb_lang(call: types.CallbackQuery, state: FSMContext):
     lang = call.data.split("_")[1]
     await state.update_data(lang=lang)
@@ -618,30 +615,36 @@ async def cb_lang(call: types.CallbackQuery, state: FSMContext):
     await state.set_state(Reg.age)
     await call.answer()
 
-@dp.message(Reg.lang)
+@dp.message(StateFilter(Reg.lang))
 async def reg_lang_text(message: types.Message, state: FSMContext):
     await message.answer(LANGS["uz"]["lang_select"], reply_markup=lang_kb())
 
-@dp.message(Reg.age)
+# ── 5. REGISTRATION FSM — age ─────────────────────────────────────────────────
+@dp.message(StateFilter(Reg.age))
 async def reg_age(message: types.Message, state: FSMContext):
     data = await state.get_data()
     lang = data.get("lang", "uz")
     try:
         age = int(message.text.strip())
+        if age < 5 or age > 120:
+            raise ValueError
     except ValueError:
-        await message.answer("❌ Iltimos, raqam kiriting!")
+        await message.answer("❌ Iltimos, to'g'ri yosh kiriting (5-120)!")
         return
     await state.update_data(age=age)
     await message.answer(t(lang, "ask_height"))
     await state.set_state(Reg.height)
 
-@dp.message(Reg.height)
+# ── 6. REGISTRATION FSM — height ─────────────────────────────────────────────
+@dp.message(StateFilter(Reg.height))
 async def reg_height(message: types.Message, state: FSMContext):
     data = await state.get_data()
     lang = data.get("lang", "uz")
-    txt  = message.text.strip().replace("sm","").replace("см","").replace("cm","").strip()
+    txt = message.text.strip().replace("sm","").replace("см","").replace("cm","").strip()
     try:
         height = float(txt)
+        if height < 50 or height > 250:
+            raise ValueError
     except ValueError:
         await message.answer("❌ Iltimos, to'g'ri qiymat kiriting! Masalan: 170")
         return
@@ -649,4 +652,751 @@ async def reg_height(message: types.Message, state: FSMContext):
     await message.answer(t(lang, "ask_weight"))
     await state.set_state(Reg.weight)
 
-@dp.
+# ── 7. REGISTRATION FSM — weight ────────────────────────────────────────────
+@dp.message(StateFilter(Reg.weight))
+async def reg_weight(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data.get("lang", "uz")
+    txt = message.text.strip().replace("kg","").replace("кг","").strip()
+    try:
+        weight = float(txt)
+        if weight < 20 or weight > 300:
+            raise ValueError
+    except ValueError:
+        await message.answer("❌ Iltimos, to'g'ri vazn kiriting! Masalan: 70")
+        return
+    await state.update_data(weight=weight)
+    await message.answer(t(lang, "ask_goal"), reply_markup=goal_kb(lang))
+    await state.set_state(Reg.goal)
+
+# ── 8. REGISTRATION FSM — goal ───────────────────────────────────────────────
+@dp.message(StateFilter(Reg.goal))
+async def reg_goal(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data.get("lang", "uz")
+    valid = [t(lang, "goal_lose"), t(lang, "goal_gain"), t(lang, "goal_keep")]
+    if message.text not in valid:
+        await message.answer(t(lang, "ask_goal"), reply_markup=goal_kb(lang))
+        return
+    await state.update_data(target=message.text)
+    await message.answer(t(lang, "ask_gender"), reply_markup=gender_kb(lang))
+    await state.set_state(Reg.gender)
+
+# ── 9. REGISTRATION FSM — gender ─────────────────────────────────────────────
+@dp.message(StateFilter(Reg.gender))
+async def reg_gender(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data.get("lang", "uz")
+    valid = [t(lang, "gender_male"), t(lang, "gender_female")]
+    if message.text not in valid:
+        await message.answer(t(lang, "ask_gender"), reply_markup=gender_kb(lang))
+        return
+    await state.update_data(gender=message.text)
+    await message.answer(t(lang, "ask_activity"), reply_markup=activity_kb(lang))
+    await state.set_state(Reg.activity)
+
+# ── 10. REGISTRATION FSM — activity (FINAL STEP) ─────────────────────────────
+@dp.message(StateFilter(Reg.activity))
+async def reg_activity(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data.get("lang", "uz")
+    act_map = {
+        t(lang, "activity_low"):    "low",
+        t(lang, "activity_medium"): "medium",
+        t(lang, "activity_high"):   "high",
+    }
+    if message.text not in act_map:
+        await message.answer(t(lang, "ask_activity"), reply_markup=activity_kb(lang))
+        return
+    activity = act_map[message.text]
+    await state.update_data(activity=activity)
+    data = await state.get_data()
+
+    tid = message.from_user.id
+    uname = message.from_user.username or ""
+    fname = message.from_user.first_name or ""
+
+    # Save user to DB
+    save_user(
+        tid,
+        username=uname,
+        first_name=fname,
+        lang=lang,
+        age=data.get("age"),
+        height=data.get("height"),
+        weight=data.get("weight"),
+        target=data.get("target", ""),
+        gender=data.get("gender", ""),
+        activity=activity,
+        trial_start=datetime.now().isoformat(),
+        is_vip=0,
+    )
+    user = get_user(tid)
+    cal_goal = calc_calories_goal(user)
+    save_user(tid, calories_goal=cal_goal)
+
+    await state.clear()
+    await message.answer(t(lang, "reg_done"), reply_markup=ReplyKeyboardRemove())
+    await message.answer(t(lang, "main_menu"), reply_markup=main_menu_kb(lang))
+
+# ── 11. EDIT PROFILE FSM ────────────────────────────────────────────────────
+@dp.message(StateFilter(EditProfile.value))
+async def edit_profile_value(message: types.Message, state: FSMContext):
+    data  = await state.get_data()
+    field = data.get("field")
+    tid   = message.from_user.id
+    user  = get_user(tid)
+    lang  = user.get("lang", "uz") if user else "uz"
+    txt   = message.text.strip()
+
+    if field == "height":
+        try:
+            val = float(txt.replace("sm","").replace("sm","").replace("cm",""))
+            save_user(tid, height=val)
+        except ValueError:
+            await message.answer("❌ To'g'ri qiymat kiriting! Masalan: 170")
+            return
+    elif field == "weight":
+        try:
+            val = float(txt.replace("kg","").replace("кг",""))
+            save_user(tid, weight=val)
+        except ValueError:
+            await message.answer("❌ To'g'ri vazn kiriting! Masalan: 70")
+            return
+    elif field == "age":
+        try:
+            val = int(txt)
+            save_user(tid, age=val)
+        except ValueError:
+            await message.answer("❌ To'g'ri yosh kiriting!")
+            return
+    elif field == "target":
+        save_user(tid, target=txt)
+    elif field == "activity":
+        act_map = {"low": "low", "medium": "medium", "high": "high",
+                   "kam": "low", "o'rta": "medium", "yuqori": "high"}
+        activity = act_map.get(txt.lower(), "medium")
+        save_user(tid, activity=activity)
+
+    # Recalculate calories
+    user = get_user(tid)
+    save_user(tid, calories_goal=calc_calories_goal(user))
+
+    await state.clear()
+    labels = {"uz": "✅ Ma'lumot yangilandi!", "ru": "✅ Данные обновлены!", "en": "✅ Updated!"}
+    await message.answer(labels.get(lang, labels["uz"]), reply_markup=main_menu_kb(lang))
+
+# ── 12. PAYMENT FSM — waiting for receipt photo ──────────────────────────────
+@dp.message(StateFilter(PaymentState.waiting_receipt), F.photo)
+async def payment_receipt_photo(message: types.Message, state: FSMContext):
+    data   = await state.get_data()
+    plan   = data.get("plan", "unknown")
+    tid    = message.from_user.id
+    user   = get_user(tid)
+    lang   = user.get("lang", "uz") if user else "uz"
+    fid    = message.photo[-1].file_id
+
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO payment_requests (telegram_id, plan, photo_file_id) VALUES (?,?,?)",
+        (tid, plan, fid)
+    )
+    conn.commit()
+    req_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    conn.close()
+
+    await state.clear()
+    labels = {
+        "uz": "✅ Chekingiz qabul qilindi! Admin tekshirib, tez orada VIP beriladi.",
+        "ru": "✅ Чек принят! Администратор проверит и выдаст VIP.",
+        "en": "✅ Receipt received! Admin will verify and grant VIP soon.",
+    }
+    await message.answer(labels.get(lang, labels["uz"]), reply_markup=main_menu_kb(lang))
+
+    # Notify admin
+    plan_label = "Oylik (20,000)" if plan == "monthly" else "Yillik (220,000)"
+    uname = message.from_user.username or str(tid)
+    fname = message.from_user.first_name or ""
+    admin_text = (f"💳 Yangi to'lov so'rovi!\n\n"
+                  f"👤 {fname} (@{uname}) — ID: {tid}\n"
+                  f"📦 Tarif: {plan_label}\n"
+                  f"🆔 Request ID: {req_id}")
+    try:
+        await bot.send_photo(
+            ADMIN_ID, fid,
+            caption=admin_text,
+            reply_markup=admin_vip_kb(tid, req_id)
+        )
+    except Exception as e:
+        logging.error(f"Admin notify error: {e}")
+
+@dp.message(StateFilter(PaymentState.waiting_receipt))
+async def payment_receipt_not_photo(message: types.Message, state: FSMContext):
+    tid  = message.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang", "uz") if user else "uz"
+    labels = {
+        "uz": "📸 Iltimos, to'lov chekini RASM sifatida yuboring!",
+        "ru": "📸 Пожалуйста, отправьте фото чека!",
+        "en": "📸 Please send the payment receipt as a PHOTO!",
+    }
+    await message.answer(labels.get(lang, labels["uz"]))
+
+# ── 13. VIP PLAN SELECTION callbacks ─────────────────────────────────────────
+@dp.callback_query(F.data.startswith("vip_plan_"))
+async def cb_vip_plan(call: types.CallbackQuery, state: FSMContext):
+    plan = call.data.replace("vip_plan_", "")  # "monthly" or "yearly"
+    tid  = call.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang", "uz") if user else "uz"
+
+    price = "20,000 so'm" if plan == "monthly" else "220,000 so'm"
+    labels = {
+        "uz": (f"💳 {price} miqdorida {CARD_NUMBER} kartasiga o'tkazing.\n\nTo'lovdan so'ng chekni yuboring:"),
+        "ru": (f"💳 Переведите {price} на карту {CARD_NUMBER}.\n\nПосле оплаты отправьте чек:"),
+        "en": (f"💳 Transfer {price} to card {CARD_NUMBER}.\n\nAfter payment send the receipt:"),
+    }
+    await call.message.edit_text(labels.get(lang, labels["uz"]))
+    await state.update_data(plan=plan)
+    await state.set_state(PaymentState.waiting_receipt)
+    await call.answer()
+
+# ── 14. ADMIN APPROVE / REJECT callbacks ─────────────────────────────────────
+@dp.callback_query(F.data.startswith("admin_approve_"))
+async def cb_admin_approve(call: types.CallbackQuery):
+    if call.from_user.id != ADMIN_ID:
+        await call.answer("⛔ Ruxsat yo'q!")
+        return
+    _, _, user_id_s, req_id_s = call.data.split("_", 3)
+    user_id = int(user_id_s)
+    req_id  = int(req_id_s)
+
+    save_user(user_id, is_vip=1,
+              vip_start=datetime.now().isoformat(),
+              vip_end=(datetime.now() + timedelta(days=365)).isoformat())
+    conn = get_conn()
+    conn.execute("UPDATE payment_requests SET status='approved' WHERE id=?", (req_id,))
+    conn.commit()
+    conn.close()
+
+    try:
+        user = get_user(user_id)
+        lang = user.get("lang","uz") if user else "uz"
+        labels = {
+            "uz": "🎉 VIP obuna faollashtirildi! Endi barcha imkoniyatlardan foydalaning.",
+            "ru": "🎉 VIP подписка активирована!",
+            "en": "🎉 VIP subscription activated!",
+        }
+        await bot.send_message(user_id, labels.get(lang, labels["uz"]))
+    except Exception as e:
+        logging.error(f"VIP notify error: {e}")
+
+    await call.message.edit_caption(call.message.caption + "\n\n✅ TASDIQLANDI")
+    await call.answer("✅ VIP berildi!")
+
+@dp.callback_query(F.data.startswith("admin_reject_"))
+async def cb_admin_reject(call: types.CallbackQuery):
+    if call.from_user.id != ADMIN_ID:
+        await call.answer("⛔ Ruxsat yo'q!")
+        return
+    _, _, user_id_s, req_id_s = call.data.split("_", 3)
+    user_id = int(user_id_s)
+    req_id  = int(req_id_s)
+
+    conn = get_conn()
+    conn.execute("UPDATE payment_requests SET status='rejected' WHERE id=?", (req_id,))
+    conn.commit()
+    conn.close()
+
+    try:
+        user = get_user(user_id)
+        lang = user.get("lang","uz") if user else "uz"
+        labels = {
+            "uz": "❌ Afsuski, to'lovingiz tasdiqlanmadi. Muammo bo'lsa admin bilan bog'laning.",
+            "ru": "❌ Оплата не подтверждена.",
+            "en": "❌ Payment not confirmed.",
+        }
+        await bot.send_message(user_id, labels.get(lang, labels["uz"]))
+    except Exception as e:
+        logging.error(f"Reject notify error: {e}")
+
+    await call.message.edit_caption(call.message.caption + "\n\n❌ RAD ETILDI")
+    await call.answer("❌ Rad etildi")
+
+# ── 15. WATER callbacks ───────────────────────────────────────────────────────
+@dp.callback_query(F.data == "water_drank")
+async def cb_water_drank(call: types.CallbackQuery):
+    tid  = call.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang","uz") if user else "uz"
+    conn = get_conn()
+    conn.execute("INSERT INTO water_logs (telegram_id) VALUES (?)", (tid,))
+    conn.commit()
+    conn.close()
+    labels = {"uz": "💧 250 ml suv qo'shildi!", "ru": "💧 250 мл добавлено!", "en": "💧 250 ml added!"}
+    await call.answer(labels.get(lang, labels["uz"]))
+
+@dp.callback_query(F.data == "water_today")
+async def cb_water_today(call: types.CallbackQuery):
+    tid  = call.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang","uz") if user else "uz"
+    today = datetime.now(TZ).strftime("%Y-%m-%d")
+    conn  = get_conn()
+    rows  = conn.execute(
+        "SELECT COUNT(*) as cnt FROM water_logs WHERE telegram_id=? AND date(logged_at)=?",
+        (tid, today)
+    ).fetchone()
+    conn.close()
+    total_ml = rows["cnt"] * 250
+    labels = {
+        "uz": f"💧 Bugun ichgan suvingiz: {total_ml} ml ({rows['cnt']} stakan)",
+        "ru": f"💧 Сегодня выпито: {total_ml} мл ({rows['cnt']} стаканов)",
+        "en": f"💧 Today you drank: {total_ml} ml ({rows['cnt']} glasses)",
+    }
+    await call.answer(labels.get(lang, labels["uz"]), show_alert=True)
+
+# ── 16. FOOD LOG callbacks (eat / cancel) ────────────────────────────────────
+@dp.callback_query(F.data.startswith("eat_"))
+async def cb_eat(call: types.CallbackQuery):
+    pend_id = int(call.data.split("_")[1])
+    entry   = pending_food.pop(pend_id, None)
+    if not entry:
+        await call.answer("Vaqt o'tdi yoki allaqachon qo'shilgan!")
+        return
+    tid  = entry["tid"]
+    lang = entry.get("lang","uz")
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO food_logs (telegram_id, food_name, calories, protein, fat, carbs, meal_type) VALUES (?,?,?,?,?,?,?)",
+        (tid, entry["food"], entry["cal"], entry["protein"], entry["fat"], entry["carbs"], entry["meal_type"])
+    )
+    conn.commit()
+    conn.close()
+    labels = {
+        "uz": f"✅ {entry['food']} — {entry['cal']:.0f} kkal qo'shildi!",
+        "ru": f"✅ {entry['food']} — {entry['cal']:.0f} ккал добавлено!",
+        "en": f"✅ {entry['food']} — {entry['cal']:.0f} kcal added!",
+    }
+    await call.answer(labels.get(lang, labels["uz"]))
+    try:
+        await call.message.delete()
+    except Exception:
+        pass
+
+@dp.callback_query(F.data.startswith("cancel_food_"))
+async def cb_cancel_food(call: types.CallbackQuery):
+    pend_id = int(call.data.split("_")[2])
+    pending_food.pop(pend_id, None)
+    lang = call.from_user.language_code or "uz"
+    labels = {"uz": "❌ Bekor qilindi", "ru": "❌ Отменено", "en": "❌ Cancelled"}
+    await call.answer(labels.get(lang, labels["uz"]))
+    try:
+        await call.message.delete()
+    except Exception:
+        pass
+
+# ── 17. PROFILE callbacks ─────────────────────────────────────────────────────
+@dp.callback_query(F.data == "prof_info")
+async def cb_prof_info(call: types.CallbackQuery):
+    tid  = call.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang","uz") if user else "uz"
+    if not user:
+        await call.answer("Avval ro'yxatdan o'ting!")
+        return
+    w = user.get("weight","?"); h = user.get("height","?"); a = user.get("age","?")
+    g = user.get("gender","?"); tgt = user.get("target","?"); act = user.get("activity","?")
+    cal = user.get("calories_goal","?")
+    labels = {
+        "uz": (f"👤 Profil ma'lumotlari:\n\n"
+               f"📏 Bo'y: {h} sm\n⚖️ Vazn: {w} kg\n🎂 Yosh: {a}\n"
+               f"🧬 Jins: {g}\n🎯 Maqsad: {tgt}\n🏃 Faollik: {act}\n"
+               f"🔥 Kunlik kaloriya: {cal} kkal"),
+        "ru": (f"👤 Данные профиля:\n\n"
+               f"📏 Рост: {h} см\n⚖️ Вес: {w} кг\n🎂 Возраст: {a}\n"
+               f"🧬 Пол: {g}\n🎯 Цель: {tgt}\n🏃 Активность: {act}\n"
+               f"🔥 Калорий в день: {cal} ккал"),
+        "en": (f"👤 Profile info:\n\n"
+               f"📏 Height: {h} cm\n⚖️ Weight: {w} kg\n🎂 Age: {a}\n"
+               f"🧬 Gender: {g}\n🎯 Goal: {tgt}\n🏃 Activity: {act}\n"
+               f"🔥 Daily calories: {cal} kcal"),
+    }
+    await call.message.edit_text(labels.get(lang, labels["uz"]), reply_markup=profile_kb(lang))
+    await call.answer()
+
+@dp.callback_query(F.data == "prof_sub")
+async def cb_prof_sub(call: types.CallbackQuery):
+    tid  = call.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang","uz") if user else "uz"
+    if is_vip(user):
+        vip_end = user.get("vip_end","?")
+        labels = {
+            "uz": f"⭐ Siz VIP obunachisiz!\nMuddati: {vip_end[:10] if vip_end != '?' else '?'}",
+            "ru": f"⭐ У вас VIP подписка!\nДо: {vip_end[:10] if vip_end != '?' else '?'}",
+            "en": f"⭐ You have VIP!\nUntil: {vip_end[:10] if vip_end != '?' else '?'}",
+        }
+    elif is_vip_or_trial(user):
+        days = get_trial_remaining(user)
+        labels = {
+            "uz": f"🎁 Bepul sinov: {days} kun qoldi",
+            "ru": f"🎁 Пробный период: осталось {days} дн.",
+            "en": f"🎁 Free trial: {days} days left",
+        }
+    else:
+        labels = {
+            "uz": "❌ Obuna yo'q. VIP sotib oling!",
+            "ru": "❌ Нет подписки. Купите VIP!",
+            "en": "❌ No subscription. Buy VIP!",
+        }
+    await call.message.edit_text(labels.get(lang, labels["uz"]), reply_markup=profile_kb(lang))
+    await call.answer()
+
+@dp.callback_query(F.data == "prof_edit")
+async def cb_prof_edit(call: types.CallbackQuery):
+    tid  = call.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang","uz") if user else "uz"
+    labels = {
+        "uz": "✏️ Nima o'zgartirmoqchisiz?",
+        "ru": "✏️ Что хотите изменить?",
+        "en": "✏️ What would you like to change?",
+    }
+    await call.message.edit_text(labels.get(lang, labels["uz"]), reply_markup=edit_profile_kb(lang))
+    await call.answer()
+
+@dp.callback_query(F.data == "prof_back")
+async def cb_prof_back(call: types.CallbackQuery):
+    tid  = call.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang","uz") if user else "uz"
+    await call.message.delete()
+    await call.answer()
+
+@dp.callback_query(F.data.startswith("edit_"))
+async def cb_edit_field(call: types.CallbackQuery, state: FSMContext):
+    field = call.data.replace("edit_", "")
+    tid   = call.from_user.id
+    user  = get_user(tid)
+    lang  = user.get("lang","uz") if user else "uz"
+    await state.update_data(field=field)
+    await state.set_state(EditProfile.value)
+    prompts = {
+        "uz": {"height": "📏 Yangi bo'yingizni kiriting (sm):", "weight": "⚖️ Yangi vazningizni kiriting (kg):",
+               "age": "🎂 Yangi yoshingizni kiriting:", "target": "🎯 Yangi maqsadingiz:", "activity": "🏃 Yangi faollik (low/medium/high):"},
+        "ru": {"height": "📏 Введите новый рост (см):", "weight": "⚖️ Введите новый вес (кг):",
+               "age": "🎂 Введите новый возраст:", "target": "🎯 Новая цель:", "activity": "🏃 Новая активность (low/medium/high):"},
+        "en": {"height": "📏 Enter new height (cm):", "weight": "⚖️ Enter new weight (kg):",
+               "age": "🎂 Enter new age:", "target": "🎯 New goal:", "activity": "🏃 New activity (low/medium/high):"},
+    }
+    prompt = prompts.get(lang, prompts["uz"]).get(field, "Yangi qiymat:")
+    await call.message.edit_text(prompt)
+    await call.answer()
+
+# ── 18. AI CHAT FSM handlers ──────────────────────────────────────────────────
+@dp.message(StateFilter(AIChat.chatting), F.photo)
+async def ai_chat_photo(message: types.Message, state: FSMContext):
+    """If user sends a photo while in AI chat — treat it as food analysis."""
+    await _analyze_food_photo(message)
+
+@dp.message(StateFilter(AIChat.chatting))
+async def ai_chat_message(message: types.Message, state: FSMContext):
+    tid  = message.from_user.id
+    user = get_user(tid)
+    lang = user.get("lang","uz") if user else "uz"
+
+    if not is_vip_or_trial(user):
+        await state.clear()
+        await message.answer(t(lang, "trial_expired"), reply_markup=main_menu_kb(lang))
+        return
+
+    wait = await message.answer("🤔 ...")
+    try:
+        user_text = message.text or ""
+        system_prompt = (
+            f"Sen professional diyetolog va sog'lom ovqatlanish bo'yicha maslahatchisan. "
+            f"Foydalanuvchi ma'lumotlari: yosh={user.get('age')}, bo'y={user.get('height')} sm, "
+            f"vazn={user.get('weight')} kg, maqsad={user.get('target')}, "
+            f"kunlik kaloriya={user.get('calories_goal')} kkal. "
+            f"Faqat {lang} tilida javob ber. Qisqa va aniq bo'l."
+        )
+        response = await asyncio.to_thread(
+            gemini.models.generate_content,
+            model="gemini-1.5-flash",
+            contents=[
+                genai_types.Content(parts=[genai_types.Part(text=system_prompt + "\n\nFoydalanuvchi: " + user_text)])
+            ]
+        )
+        await wait.delete()
+        await message.answer(response.text.strip())
+    except Exception as e:
+        logging.error(f"AI chat error: {e}")
+        try:
+            await wait.delete()
+        except Exception:
+            pass
+        labels = {"uz": "❌ Xatolik yuz berdi. Keyinroq urinib ko'ring.", "ru": "❌ Ошибка. Попробуйте позже.", "en": "❌ Error. Try again later."}
+        await message.answer(labels.get(lang, labels["uz"]))
+
+# ── 19. MAIN MENU BUTTONS (only outside FSM states) ──────────────────────────
+@dp.message(F.text)
+async def main_menu_handler(message: types.Message, state: FSMContext):
+    """Catch-all for menu buttons. Only fires when no FSM state is active."""
+    tid  = message.from_user.id
+    user = get_user(tid)
+
+    # If user not registered — redirect to /start
+    if not user:
+        await message.answer("Salom! Avval /start buyrug'ini yuboring.")
+        return
+
+    lang = user.get("lang","uz")
+    txt  = message.text
+
+    # ── Daily Ration
+    if txt == t(lang, "btn_ration"):
+        if not is_vip_or_trial(user):
+            await message.answer(t(lang, "paywall"), reply_markup=vip_plans_kb())
+            return
+        cal = user.get("calories_goal", 2000)
+        prompt = (
+            f"Foydalanuvchi: yosh={user.get('age')}, bo'y={user.get('height')} sm, "
+            f"vazn={user.get('weight')} kg, maqsad={user.get('target')}, "
+            f"kaloriya maqsadi={cal} kkal/kun. "
+            f"Bugungi {lang} tilida kunlik ratsion tuzib ber: nonushta, tushlik, kechki ovqat."
+        )
+        wait = await message.answer("⏳ Ratsion tayyorlanmoqda...")
+        try:
+            resp = await asyncio.to_thread(
+                gemini.models.generate_content,
+                model="gemini-1.5-flash",
+                contents=[genai_types.Content(parts=[genai_types.Part(text=prompt)])]
+            )
+            await wait.delete()
+            await message.answer(resp.text.strip())
+        except Exception as e:
+            logging.error(f"Ration error: {e}")
+            await wait.delete()
+            await message.answer("❌ Xatolik. Keyinroq urinib ko'ring.")
+
+    # ── Water ration
+    elif txt == t(lang, "btn_water"):
+        if not is_vip_or_trial(user):
+            await message.answer(t(lang, "paywall"), reply_markup=vip_plans_kb())
+            return
+        w = user.get("weight", 70)
+        rec_ml = int(float(w) * 35)
+        labels = {
+            "uz": f"💧 Kunlik suv tavsiyasi: {rec_ml} ml (vazningiz {w} kg asosida)",
+            "ru": f"💧 Рекомендация по воде: {rec_ml} мл (вес {w} кг)",
+            "en": f"💧 Daily water recommendation: {rec_ml} ml (weight {w} kg)",
+        }
+        await message.answer(labels.get(lang, labels["uz"]), reply_markup=water_kb(lang))
+
+    # ── Today's food log
+    elif txt == t(lang, "btn_food_today"):
+        if not is_vip_or_trial(user):
+            await message.answer(t(lang, "paywall"), reply_markup=vip_plans_kb())
+            return
+        today = datetime.now(TZ).strftime("%Y-%m-%d")
+        conn  = get_conn()
+        rows  = conn.execute(
+            "SELECT food_name, calories, meal_type FROM food_logs WHERE telegram_id=? AND date(logged_at)=? ORDER BY logged_at",
+            (tid, today)
+        ).fetchall()
+        total = conn.execute(
+            "SELECT COALESCE(SUM(calories),0) as s FROM food_logs WHERE telegram_id=? AND date(logged_at)=?",
+            (tid, today)
+        ).fetchone()["s"]
+        conn.close()
+        if not rows:
+            labels = {"uz": "📋 Bugun hali ovqat qo'shilmagan.", "ru": "📋 Сегодня ничего не добавлено.", "en": "📋 No food logged today."}
+            await message.answer(labels.get(lang, labels["uz"]))
+            return
+        lines = []
+        for r in rows:
+            lines.append(f"{meal_label(r['meal_type'], lang)}: {r['food_name']} — {r['calories']:.0f} kkal")
+        goal = user.get("calories_goal", 2000)
+        headers = {"uz": f"📋 Bugungi ovqatlar:\n\n", "ru": "📋 Еда за сегодня:\n\n", "en": "📋 Today's food:\n\n"}
+        footers = {
+            "uz": f"\n\n🔥 Jami: {total:.0f} / {goal} kkal",
+            "ru": f"\n\n🔥 Итого: {total:.0f} / {goal} ккал",
+            "en": f"\n\n🔥 Total: {total:.0f} / {goal} kcal",
+        }
+        await message.answer(headers.get(lang,"") + "\n".join(lines) + footers.get(lang,""))
+
+    # ── Weekly report
+    elif txt == t(lang, "btn_food_week"):
+        if not is_vip_or_trial(user):
+            await message.answer(t(lang, "paywall"), reply_markup=vip_plans_kb())
+            return
+        week_ago = (datetime.now(TZ) - timedelta(days=7)).strftime("%Y-%m-%d")
+        conn = get_conn()
+        rows = conn.execute(
+            "SELECT date(logged_at) as d, COALESCE(SUM(calories),0) as s FROM food_logs WHERE telegram_id=? AND date(logged_at)>=? GROUP BY d ORDER BY d",
+            (tid, week_ago)
+        ).fetchall()
+        conn.close()
+        if not rows:
+            labels = {"uz": "📅 So'nggi 7 kunda ma'lumot yo'q.", "ru": "📅 Нет данных за 7 дней.", "en": "📅 No data for last 7 days."}
+            await message.answer(labels.get(lang, labels["uz"]))
+            return
+        lines = [f"{r['d']}: {r['s']:.0f} kkal" for r in rows]
+        headers = {"uz": "📅 Haftalik hisobot:\n\n", "ru": "📅 Недельный отчёт:\n\n", "en": "📅 Weekly report:\n\n"}
+        await message.answer(headers.get(lang,"") + "\n".join(lines))
+
+    # ── Monthly report
+    elif txt == t(lang, "btn_food_month"):
+        if not is_vip_or_trial(user):
+            await message.answer(t(lang, "paywall"), reply_markup=vip_plans_kb())
+            return
+        month_ago = (datetime.now(TZ) - timedelta(days=30)).strftime("%Y-%m-%d")
+        conn = get_conn()
+        rows = conn.execute(
+            "SELECT date(logged_at) as d, COALESCE(SUM(calories),0) as s FROM food_logs WHERE telegram_id=? AND date(logged_at)>=? GROUP BY d ORDER BY d",
+            (tid, month_ago)
+        ).fetchall()
+        conn.close()
+        if not rows:
+            labels = {"uz": "📆 So'nggi 30 kunda ma'lumot yo'q.", "ru": "📆 Нет данных за 30 дней.", "en": "📆 No data for last 30 days."}
+            await message.answer(labels.get(lang, labels["uz"]))
+            return
+        lines = [f"{r['d']}: {r['s']:.0f} kkal" for r in rows]
+        total_avg = sum(r['s'] for r in rows) / len(rows)
+        headers = {"uz": "📆 Oylik hisobot:\n\n", "ru": "📆 Месячный отчёт:\n\n", "en": "📆 Monthly report:\n\n"}
+        footers = {"uz": f"\n\n📊 O'rtacha: {total_avg:.0f} kkal/kun", "ru": f"\n\n📊 Среднее: {total_avg:.0f} ккал/день", "en": f"\n\n📊 Average: {total_avg:.0f} kcal/day"}
+        await message.answer(headers.get(lang,"") + "\n".join(lines) + footers.get(lang,""))
+
+    # ── AI Dietologist
+    elif txt == t(lang, "btn_ai"):
+        if not is_vip_or_trial(user):
+            await message.answer(t(lang, "paywall"), reply_markup=vip_plans_kb())
+            return
+        await state.set_state(AIChat.chatting)
+        labels = {
+            "uz": "🤖 AI Diyetolog bilan suhbat boshlandi! /menu buyrug'i bilan chiqishingiz mumkin.",
+            "ru": "🤖 Чат с AI-диетологом начат! /menu для выхода.",
+            "en": "🤖 AI Dietologist chat started! /menu to exit.",
+        }
+        await message.answer(labels.get(lang, labels["uz"]))
+
+    # ── Profile
+    elif txt == t(lang, "btn_profile"):
+        labels = {
+            "uz": "👤 Profilingiz:",
+            "ru": "👤 Ваш профиль:",
+            "en": "👤 Your profile:",
+        }
+        await message.answer(labels.get(lang, labels["uz"]), reply_markup=profile_kb(lang))
+
+    # ── Buy VIP
+    elif txt == t(lang, "btn_vip"):
+        await _show_vip_plans(message, lang, state)
+
+    # ── Food photo button
+    elif txt == t(lang, "btn_photo_food"):
+        if not is_vip_or_trial(user):
+            await message.answer(t(lang, "paywall"), reply_markup=vip_plans_kb())
+            return
+        labels = {
+            "uz": "📸 Ovqatingizning rasmini yuboring, men tahlil qilaman!",
+            "ru": "📸 Пришлите фото еды, я проанализирую!",
+            "en": "📸 Send a photo of your food and I'll analyze it!",
+        }
+        await message.answer(labels.get(lang, labels["uz"]))
+
+    else:
+        # Unknown text — show main menu
+        await message.answer(t(lang, "main_menu"), reply_markup=main_menu_kb(lang))
+
+# ── 20. FOOD PHOTO (default state — outside any FSM) ─────────────────────────
+@dp.message(F.photo)
+async def handle_photo(message: types.Message, state: FSMContext):
+    tid  = message.from_user.id
+    user = get_user(tid)
+    if not user:
+        await message.answer("Avval /start buyrug'ini yuboring.")
+        return
+    if not is_vip_or_trial(user):
+        lang = user.get("lang","uz")
+        await message.answer(t(lang, "paywall"), reply_markup=vip_plans_kb())
+        return
+    await _analyze_food_photo(message)
+
+# ── 21. VIP helper (shared) ──────────────────────────────────────────────────
+async def _show_vip_plans(message, lang, state):
+    """Show VIP plan selection inline keyboard."""
+    labels = {
+        "uz": ("⭐ VIP Obuna\n\n"
+               "📅 Oylik — 20,000 so'm\n"
+               "📆 Yillik — 220,000 so'm (2 oy tekin!)\n\n"
+               "Tarif tanlang:"),
+        "ru": ("⭐ VIP Подписка\n\n"
+               "📅 Месячная — 20,000 сум\n"
+               "📆 Годовая — 220,000 сум (2 мес. бесплатно!)\n\n"
+               "Выберите тариф:"),
+        "en": ("⭐ VIP Subscription\n\n"
+               "📅 Monthly — 20,000 UZS\n"
+               "📆 Yearly — 220,000 UZS (2 months free!)\n\n"
+               "Choose a plan:"),
+    }
+    await message.answer(labels.get(lang, labels["uz"]), reply_markup=vip_plans_kb())
+
+# ── 22. ADMIN BROADCAST ───────────────────────────────────────────────────────
+@dp.message(Command("broadcast"))
+async def cmd_broadcast(message: types.Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID:
+        return
+    await state.set_state(BroadcastState.message)
+    await message.answer("📢 Xabar matnini yuboring (barcha foydalanuvchilarga yuboriladi):")
+
+@dp.message(StateFilter(BroadcastState.message))
+async def broadcast_message(message: types.Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID:
+        return
+    await state.clear()
+    conn = get_conn()
+    users = conn.execute("SELECT telegram_id FROM users").fetchall()
+    conn.close()
+    sent = failed = 0
+    for u in users:
+        try:
+            await bot.send_message(u["telegram_id"], message.text)
+            sent += 1
+            await asyncio.sleep(0.05)
+        except Exception:
+            failed += 1
+    await message.answer(f"📢 Yuborildi: {sent}, muvaffaqiyatsiz: {failed}")
+
+# ── 23. ADMIN STATS ───────────────────────────────────────────────────────────
+@dp.message(Command("stats"))
+async def cmd_stats(message: types.Message):
+    if message.from_user.id != ADMIN_ID:
+        return
+    conn = get_conn()
+    total   = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()["c"]
+    vip_cnt = conn.execute("SELECT COUNT(*) as c FROM users WHERE is_vip=1").fetchone()["c"]
+    trial_cnt = conn.execute(
+        "SELECT COUNT(*) as c FROM users WHERE trial_start IS NOT NULL AND is_vip=0"
+    ).fetchone()["c"]
+    pending = conn.execute(
+        "SELECT COUNT(*) as c FROM payment_requests WHERE status='pending'"
+    ).fetchone()["c"]
+    conn.close()
+    await message.answer(
+        f"📊 Bot statistikasi:\n\n"
+        f"👥 Jami foydalanuvchilar: {total}\n"
+        f"⭐ VIP: {vip_cnt}\n"
+        f"🎁 Trial: {trial_cnt}\n"
+        f"💳 Kutilayotgan to'lovlar: {pending}"
+    )
+
+# ── 24. STARTUP & MAIN ────────────────────────────────────────────────────────
+async def main():
+    init_db()
+    logging.info("Bot starting...")
+    await dp.start_polling(bot, allowed_updates=["message","callback_query"])
+
+if __name__ == "__main__":
+    asyncio.run(main())
