@@ -1,6 +1,6 @@
+# requirements.txt — AI Dietitian Bot
 aiogram==3.13.1
-google-genai
-Pillow
-apscheduler
-aiohttp
-pytz
+aiosqlite==0.20.0
+apscheduler==3.10.4
+httpx==0.27.2
+pytz==2024.2
